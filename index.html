@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Home — Liakat Enterprise</title>
+<link rel="stylesheet" href="Css/Style.css">
+<script src="Js/Config.js"></script>
+<script src="Js/Db.js"></script>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container">
+    <a href="index.html" class="brand">
+      <span class="brand-mark">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M9 21v-6h6v6"/></svg>
+      </span>
+      <span class="brand-text">
+        <div class="name">Liakat Enterprise</div>
+      </span>
+    </a>
+
+    <nav class="main-nav">
+      <a href="index.html" class="active">Home</a>
+      <a href="PropertyListings.html">Property Listings</a>
+      <a href="MaterialOptions.html">Material Options</a>
+      <a href="AiVisualization.html">AI Visualization</a>
+      <a href="GeoportalMapping.html">Geoportal Mapping</a>
+      <div class="nav-more">
+        <a href="#" class="nav-more-trigger">More
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+        </a>
+        <div class="nav-more-panel">
+          <a href="ProjectUpdates.html">Project Updates</a>
+          <a href="PaymentTracking.html">Payment Tracking</a>
+          <a href="VariationOrders.html">Variation Orders</a>
+        </div>
+      </div>
+    </nav>
+
+    <div class="header-actions">
+      <a href="#" class="avatar-btn" aria-label="Account">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+      </a>
+    </div>
+  </div>
+</header>
+
+<section class="hero">
+  <img src="Img/HeroBuilding.jpg" alt="Modern residential towers in Brunei" class="hero-photo">
+  <div class="hero-overlay"></div>
+  <div class="container">
+    <h1>Quality Homes &amp; Land for a Better Tomorrow</h1>
+
+    <div class="search-panel">
+      <div class="search-toggle" id="heroToggle">
+        <button type="button" class="active">For Sale</button>
+        <button type="button">Land</button>
+      </div>
+      <form class="search-fields" id="heroForm" action="PropertyListings.html" method="get">
+        <select aria-label="Property type" name="type" id="heroType">
+          <option value="">Property Type</option>
+          <option>House</option>
+          <option>Land</option>
+          <option>Apartment</option>
+        </select>
+        <select aria-label="Location" name="location">
+          <option value="">Location</option>
+          <option>Jerudong</option>
+          <option>Mukim Berakas</option>
+          <option>Kampong Ayer</option>
+          <option>Tutong</option>
+          <option>Gadong</option>
+          <option>Seria</option>
+          <option>Beribi</option>
+          <option>Kiulap</option>
+          <option>Mentiri</option>
+          <option>Sengkurong</option>
+          <option>Muara</option>
+        </select>
+        <select aria-label="Price range" name="price">
+          <option value="">Price Range</option>
+          <option>Below B$200,000</option>
+          <option>B$200,000 – B$400,000</option>
+          <option>Above B$400,000</option>
+        </select>
+        <button type="submit" class="btn btn-primary">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+          Search
+        </button>
+      </form>
+    </div>
+  </div>
+</section>
+
+<section class="hm-featured">
+  <div class="container">
+    <div class="section-title">
+      <h2>Featured Properties</h2>
+      <a href="PropertyListings.html" class="btn-text">View all listings →</a>
+    </div>
+    <div class="property-grid" id="featuredGrid"></div>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="brand">
+      <span class="brand-mark" style="width:30px;height:30px;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" width="16" height="16"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg>
+      </span>
+      <span class="brand-text">
+        <div class="name">Liakat Enterprise</div>
+      </span>
+    </div>
+    <div class="footer-links">
+      <span>📍 Brunei Darussalam</span>
+    </div>
+  </div>
+</footer>
+
+<script src="Js/Properties.js"></script>
+<script src="Js/Listings.js"></script>
+<script>
+LEDb.ready.then(function () {
+(function () {
+  "use strict";
+  const HOUSE_ICON = `<svg width="46" height="46" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg>`;
+  const LAND_ICON  = `<svg width="46" height="46" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 12h18M6 12V5h12v7M4 12v9h16v-9"/></svg>`;
+  const PIN = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-7-5.8-7-11a7 7 0 0 1 14 0c0 5.2-7 11-7 11Z"/><circle cx="12" cy="10" r="2.5"/></svg>`;
+  const fmt = n => "B$ " + n.toLocaleString("en-US");
+  const isHouse = p => p.type === "For Sale";
+  const esc = v => String(v == null ? "" : v).replace(/[&<>"']/g, ch => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch]));
+
+  const houses = properties.filter(isHouse), plots = properties.filter(p => !isHouse(p));
+
+  const heroType = document.getElementById("heroType");
+  const types = [...(houses.length ? ["House"] : []), ...(plots.length ? ["Land"] : [])];
+  if (types.length < 2) {
+    heroType.remove();
+    document.getElementById("heroForm").classList.add("no-type");
+    if (!plots.length) document.getElementById("heroToggle").style.display = "none";
+  } else {
+    heroType.innerHTML = '<option value="">Property Type</option>' + types.map(t => `<option>${t}</option>`).join("");
+  }
+
+  const featured = [...properties.filter(p => p.featured), ...properties.filter(p => !p.featured)].slice(0, 8);
+  document.getElementById("featuredGrid").innerHTML = featured
+    .map(p => `
+      <a class="property-card" href="PropertyListings.html?property=${encodeURIComponent(p.id)}" aria-label="View details for ${esc(p.title)}">
+        <div class="property-thumb">${p.image ? `<img src="${esc(p.thumb || p.image)}" alt="" loading="lazy" decoding="async">` : (isHouse(p) ? HOUSE_ICON : LAND_ICON)}${p.tag ? `<span class="tag">${esc(p.tag)}</span>` : ""}${p.image && p.imageNote ? `<span class="img-note">${esc(p.imageNote)}</span>` : ""}</div>
+        <div class="property-body">
+          <div class="title">${esc(p.title)}</div>
+          <div class="loc">${PIN} ${esc(p.loc)}</div>
+          <div class="property-price">${fmt(p.price)}</div>
+          <div class="property-meta">${isHouse(p) ? `<span>🛏 ${p.beds}</span><span>🛁 ${p.baths}</span>` : ""}<span>▭ ${esc(p.area)}</span></div>
+        </div>
+      </a>`).join("");
+
+  const LOCATIONS = LEListings.locationNames();
+
+  document.querySelector('select[name="location"]').innerHTML =
+    '<option value="">Location</option>' + LOCATIONS.map(n => `<option>${esc(n)}</option>`).join("");
+})();
+});
+</script>
+<script src="Js/Auth.js"></script>
+</body>
+</html>

@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Manage Project Updates — Liakat Enterprise</title>
+<link rel="stylesheet" href="../Css/Style.css">
+<script src="../Js/Config.js"></script>
+<script src="../Js/Db.js"></script>
+<script src="../Js/Auth.js"></script>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container">
+    <a href="ManageUpdates.html" class="brand">
+      <span class="brand-mark">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M9 21v-6h6v6"/></svg>
+      </span>
+      <span class="brand-text">
+        <div class="name">Liakat Enterprise</div>
+      </span>
+    </a>
+    <div class="header-actions">
+      <span class="portal-badge dev">Admin Portal</span>
+      <a href="../index.html" class="btn-text" style="font-size:13px;">Back to client site</a>
+      <a href="#" class="avatar-btn" aria-label="Account">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+      </a>
+    </div>
+  </div>
+</header>
+
+<div class="dev-layout">
+  <aside class="dev-sidebar">
+    <a href="ManageUpdates.html" class="active">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+      Project Updates
+    </a>
+    <a href="Approvals.html">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9"/></svg>
+      Approvals
+    </a>
+    <a href="Payments.html">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20M6 15h4"/></svg>
+      Payments <span class="nav-badge" data-pay-badge hidden></span>
+    </a>
+      <a href="QuoteRequests.html">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8Z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></svg>
+      Quote Requests <span class="nav-badge" data-quote-badge hidden></span>
+    </a>
+      <a href="Listings.html">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M12 12v5M9.5 14.5h5"/></svg>
+      Listings
+    </a>
+  </aside>
+
+  <main class="dev-main">
+    <div class="page-header" style="padding-top:0;">
+      <h1>Manage Project Updates</h1>
+    </div>
+
+    <div class="ls-notice" id="puNotice" role="status" hidden></div>
+
+    <div class="section-split" style="grid-template-columns: 380px 1fr;">
+      <div class="card card-pad">
+        <h3 style="font-size:14px; margin-bottom:4px;" id="formTitle">New Update</h3>
+        <p style="font-size:12.5px; color:var(--text-faint); margin-bottom:14px;">Every update is posted against one of your listings.</p>
+        <form id="updateForm" class="form-grid" novalidate>
+          <div class="full field" style="margin-bottom:0;">
+            <label for="uProject">Property</label>
+            <select id="uProject"></select>
+            <div class="err" id="uProjectErr"></div>
+          </div>
+          <div class="full field" style="margin-bottom:0;">
+            <label for="uArea">Milestone / Area</label>
+            <input type="text" id="uArea" maxlength="80" placeholder="e.g. Block A – Roof Structure">
+            <div class="err" id="uAreaErr"></div>
+          </div>
+          <div class="full field" style="margin-bottom:0;">
+            <label for="uStatus">Status</label>
+            <select id="uStatus">
+              <option>In Progress</option>
+              <option>On Track</option>
+              <option>Delayed</option>
+              <option>Completed</option>
+            </select>
+          </div>
+          <div class="full field" style="margin-bottom:0;">
+            <label for="uDesc">Description</label>
+            <textarea id="uDesc" maxlength="500" placeholder="Describe the progress made..."></textarea>
+            <div class="err" id="uDescErr"></div>
+          </div>
+          <div class="full" style="display:flex; gap:10px; margin-top:4px;">
+            <button type="button" class="btn btn-outline" id="uCancel" hidden>Cancel</button>
+            <button type="submit" class="btn btn-primary" id="uSubmit" style="flex:1;">Post Update</button>
+          </div>
+        </form>
+      </div>
+
+      <div>
+        <div class="qr-toolbar">
+          <h3 style="font-size:14px;">Published Updates</h3>
+          <div class="chip-row" id="puFilters"></div>
+        </div>
+        <div class="update-list" id="updatesList"></div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="../Js/Properties.js"></script>
+<script src="../Js/Listings.js"></script>
+<script src="../Js/Updates.js"></script>
+<script>
+LEDb.ready.then(function () {
+(function () {
+  "use strict";
+  const U = window.LEUpdates;
+  const $ = id => document.getElementById(id);
+  const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, ch => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch]));
+  const fmtDate = iso => new Date(iso).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
+  const HOUSE_ICON = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M9 21v-6h6v6"/></svg>';
+  const LAND_ICON  = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 12h18M6 12V5h12v7M4 12v9h16v-9"/></svg>';
+
+  let editingId = null, filter = "All", noticeTimer = null;
+
+  $("uProject").innerHTML = properties.map(p => `<option value="${esc(p.id)}">${esc(p.title)} — ${esc(p.loc)}</option>`).join("");
+
+  function notice(html) {
+    const n = $("puNotice");
+    n.innerHTML = html; n.hidden = false;
+    clearTimeout(noticeTimer);
+    noticeTimer = setTimeout(() => { n.hidden = true; }, 8000);
+  }
+
+  function render() {
+    const all = U.getAll();
+    $("puFilters").innerHTML = ["All", ...U.STATUSES].map(s => {
+      const n = s === "All" ? all.length : all.filter(u => u.status === s).length;
+      return `<button type="button" class="chip ${filter === s ? "active" : ""}" data-filter="${esc(s)}" aria-pressed="${filter === s}">${esc(s)} (${n})</button>`;
+    }).join("");
+
+    const list = filter === "All" ? all : all.filter(u => u.status === filter);
+    $("updatesList").innerHTML = list.map(u => {
+      const p = properties.find(x => x.id === u.propertyId);
+      const title = p ? p.title : "Listing removed";
+      const loc = p ? p.loc : "";
+      const thumb = p && p.thumb ? `<img src="../${esc(p.thumb)}" alt="">` : (p && p.icon === "land" ? LAND_ICON : HOUSE_ICON);
+      return `
+      <article class="update-card">
+        <div class="update-thumb" style="display:flex; align-items:center; justify-content:center; color:var(--text-faint); overflow:hidden;">${thumb}</div>
+        <div class="update-main">
+          <div class="update-top">
+            <div class="title">${esc(title)}</div>
+            <div class="update-date">${esc(fmtDate(u.createdAt))}</div>
+          </div>
+          <div class="update-sub">${esc(loc)}${loc ? " · " : ""}${esc(u.area)}</div>
+          <p class="update-desc">${esc(u.desc)}</p>
+          <div class="update-bottom">
+            <span class="pill ${U.PILL[u.status] || "pill-navy"}">${esc(u.status)}</span>
+            <span style="display:flex; gap:14px;">
+              <button type="button" class="btn-text" data-edit="${esc(u.id)}">Edit →</button>
+              <button type="button" class="btn-danger-text" data-del="${esc(u.id)}" style="padding:0;">Delete</button>
+            </span>
+          </div>
+        </div>
+      </article>`;
+    }).join("") || `<div class="qr-empty"><strong>${all.length ? "No " + filter.toLowerCase() + " updates" : "No updates yet"}</strong>${all.length ? "Choose another filter to see the rest." : "Post your first update using the form."}</div>`;
+  }
+
+  $("puFilters").addEventListener("click", e => { const b = e.target.closest("[data-filter]"); if (b) { filter = b.dataset.filter; render(); } });
+
+  $("updatesList").addEventListener("click", e => {
+    const ed = e.target.closest("[data-edit]"), del = e.target.closest("[data-del]");
+    if (ed) startEdit(ed.dataset.edit);
+    if (del) {
+      const u = U.getAll().find(x => x.id === del.dataset.del);
+      const p = u && properties.find(x => x.id === u.propertyId);
+      if (u && confirm(`Delete this update${p ? ' for "' + p.title + '"' : ""}? This can't be undone.`)) {
+        if (editingId === u.id) resetForm();
+        U.remove(u.id); render(); notice("Update deleted.");
+      }
+    }
+  });
+
+  function startEdit(id) {
+    const u = U.getAll().find(x => x.id === id);
+    if (!u) return;
+    editingId = id;
+    $("formTitle").textContent = "Edit Update";
+    $("uProject").value = u.propertyId;
+    $("uArea").value = u.area;
+    $("uStatus").value = u.status;
+    $("uDesc").value = u.desc;
+    $("uSubmit").textContent = "Save changes";
+    $("uCancel").hidden = false;
+    document.querySelectorAll("#updateForm .err").forEach(e => e.textContent = "");
+    document.querySelectorAll("#updateForm [aria-invalid]").forEach(e => e.setAttribute("aria-invalid", "false"));
+    $("updateForm").scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+  function resetForm() {
+    editingId = null;
+    $("updateForm").reset();
+    $("formTitle").textContent = "New Update";
+    $("uSubmit").textContent = "Post Update";
+    $("uCancel").hidden = true;
+    document.querySelectorAll("#updateForm .err").forEach(e => e.textContent = "");
+    document.querySelectorAll("#updateForm [aria-invalid]").forEach(e => e.setAttribute("aria-invalid", "false"));
+  }
+  $("uCancel").addEventListener("click", resetForm);
+
+  function fail(el, errId, msg) { el.setAttribute("aria-invalid", "true"); $(errId).textContent = msg; return el; }
+  [["uArea", "uAreaErr"], ["uDesc", "uDescErr"]].forEach(([id, errId]) =>
+    $(id).addEventListener("input", () => { $(id).setAttribute("aria-invalid", "false"); $(errId).textContent = ""; }));
+
+  $("updateForm").addEventListener("submit", async e => {
+    e.preventDefault();
+    let firstBad = null;
+    const area = $("uArea").value.trim(), desc = $("uDesc").value.trim();
+    $("uArea").setAttribute("aria-invalid", "false"); $("uDesc").setAttribute("aria-invalid", "false");
+    if (!area) { fail($("uArea"), "uAreaErr", "Enter the milestone or area."); firstBad = firstBad || $("uArea"); }
+    if (!desc) { fail($("uDesc"), "uDescErr", "Enter a short description."); firstBad = firstBad || $("uDesc"); }
+    if (firstBad) { firstBad.focus(); return; }
+
+    const p = properties.find(x => x.id === $("uProject").value);
+    const sendBtn = $("updateForm").querySelector('button[type="submit"]');
+    if (sendBtn.disabled) return;
+    const sendLabel = sendBtn.textContent;
+    sendBtn.disabled = true; sendBtn.textContent = "Saving\u2026";
+    const wasEdit = !!editingId;
+    const ok = wasEdit
+      ? await U.update(editingId, { propertyId: $("uProject").value, area, status: $("uStatus").value, desc })
+      : await U.add({ id: U.newId(), propertyId: $("uProject").value, area, status: $("uStatus").value, desc, createdAt: new Date().toISOString() });
+    sendBtn.disabled = false; sendBtn.textContent = sendLabel;
+    if (!ok) { notice("Couldn't save the update. Check your internet connection and that you are still logged in, then try again."); return; }
+    notice(wasEdit ? `Changes saved${p ? " for <b>" + esc(p.title) + "</b>" : ""}.` : `Update posted${p ? " for <b>" + esc(p.title) + "</b>" : ""}.`);
+    resetForm();
+    filter = "All";
+    render();
+  });
+
+  U.onChange(render);
+  render();
+})();
+});
+</script>
+<script src="../Js/Store.js"></script>
+<script src="../Js/DevBadge.js"></script>
+</body>
+</html>

@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Property Listings — Liakat Enterprise</title>
+<link rel="stylesheet" href="Css/Style.css">
+<script src="Js/Config.js"></script>
+<script src="Js/Db.js"></script>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container">
+    <a href="index.html" class="brand">
+      <span class="brand-mark">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M9 21v-6h6v6"/></svg>
+      </span>
+      <span class="brand-text">
+        <div class="name">Liakat Enterprise</div>
+      </span>
+    </a>
+    <nav class="main-nav">
+      <a href="index.html">Home</a>
+      <a href="PropertyListings.html" class="active">Property Listings</a>
+      <a href="MaterialOptions.html">Material Options</a>
+      <a href="AiVisualization.html">AI Visualization</a>
+      <a href="GeoportalMapping.html">Geoportal Mapping</a>
+      <div class="nav-more">
+        <a href="#" class="nav-more-trigger">More
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+        </a>
+        <div class="nav-more-panel">
+          <a href="ProjectUpdates.html">Project Updates</a>
+          <a href="PaymentTracking.html">Payment Tracking</a>
+          <a href="VariationOrders.html">Variation Orders</a>
+        </div>
+      </div>
+    </nav>
+    <div class="header-actions">
+      <a href="#" class="avatar-btn" aria-label="Account">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+      </a>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+  <div class="page-header">
+    <h1>Property Listings</h1>
+  </div>
+</div>
+
+<section style="padding-bottom:56px; padding-top:20px;">
+  <div class="container">
+    <div class="listings-layout">
+
+      <aside class="card card-pad" id="filterPanel">
+        <div class="filter-group" id="typeGroup" style="padding-top:0;">
+          <h4>Listing Type</h4>
+          <label class="check-row"><input type="checkbox" name="type" value="For Sale" checked> For Sale</label>
+          <label class="check-row"><input type="checkbox" name="type" value="Land" checked> Land</label>
+        </div>
+
+        <div class="filter-group" id="designGroup">
+          <h4>House Design</h4>
+          <div id="designFilters"></div>
+        </div>
+
+        <div class="filter-group">
+          <h4>Location</h4>
+          <div id="locFilters"></div>
+        </div>
+
+        <div class="filter-group">
+          <h4>Price Range</h4>
+          <label class="check-row"><input type="radio" name="price" value="all" checked> Any price</label>
+          <label class="check-row"><input type="radio" name="price" value="0-250"> Below B$250,000</label>
+          <label class="check-row"><input type="radio" name="price" value="250-450"> B$250,000 – B$450,000</label>
+          <label class="check-row"><input type="radio" name="price" value="450-99999"> Above B$450,000</label>
+        </div>
+
+        <div class="filter-group" style="border-bottom:none;">
+          <h4>Bedrooms</h4>
+          <label class="check-row"><input type="radio" name="beds" value="all" checked> Any</label>
+          <label class="check-row"><input type="radio" name="beds" value="3"> 3+</label>
+          <label class="check-row"><input type="radio" name="beds" value="4"> 4+</label>
+        </div>
+
+        <button class="btn btn-outline btn-block" id="resetFilters" style="margin-top:6px;">Reset filters</button>
+      </aside>
+
+      <div>
+        <div class="results-bar" id="resultsAnchor">
+          <span class="count" id="resultsCount">12 properties found</span>
+          <div class="sort">
+            Sort by
+            <select id="sortSelect">
+              <option value="default">Newest</option>
+              <option value="price-asc">Price: Low to High</option>
+              <option value="price-desc">Price: High to Low</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="listings-grid" id="listingsGrid">
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="brand">
+      <span class="brand-mark" style="width:30px;height:30px;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" width="16" height="16"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg>
+      </span>
+      <span class="brand-text">
+        <div class="name">Liakat Enterprise</div>
+      </span>
+    </div>
+    <div class="footer-links">
+      <span>📍 Brunei Darussalam</span>
+    </div>
+  </div>
+</footer>
+
+<dialog class="pd" id="pdDialog" aria-labelledby="pdTitle">
+  <button type="button" class="pd-close" id="pdClose" aria-label="Close property details">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
+  </button>
+  <div class="pd-scroll" id="pdScroll"></div>
+  <div class="pd-footer">
+    <button type="button" class="btn btn-outline" id="pdCopy">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></svg>
+      <span id="pdCopyLabel" aria-live="polite">Copy link</span>
+    </button>
+    <a href="GeoportalMapping.html" class="btn btn-outline" id="pdMap">View on map</a>
+    <a href="MaterialOptions.html" class="btn btn-primary" id="pdMaterials">Explore materials →</a>
+    <button type="button" class="btn btn-primary" id="pdQuote" hidden>Request a quote</button>
+  </div>
+</dialog>
+
+<script src="Js/Properties.js"></script>
+<script src="Js/Listings.js"></script>
+<script src="Js/Store.js"></script>
+<script src="Js/LandQuote.js"></script>
+<script>
+LEDb.ready.then(function () {
+const houseIcon = `<svg width="46" height="46" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M9 21v-6h6v6"/></svg>`;
+const landIcon  = `<svg width="46" height="46" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 12h18M6 12V5h12v7M4 12v9h16v-9"/></svg>`;
+const locPin    = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-7-5.8-7-11a7 7 0 0 1 14 0c0 5.2-7 11-7 11Z"/><circle cx="12" cy="10" r="2.5"/></svg>`;
+
+function fmtPrice(n){ return "B$ " + n.toLocaleString(); }
+const esc = v => String(v == null ? "" : v).replace(/[&<>"']/g, ch => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[ch]));
+
+function render(){
+  const types = [...document.querySelectorAll('input[name="type"]:checked')].map(i=>i.value);
+  const locs = [...document.querySelectorAll('input[name="location"]:checked')].map(i=>i.value);
+  const priceVal = document.querySelector('input[name="price"]:checked').value;
+  const bedsVal = document.querySelector('input[name="beds"]:checked').value;
+  const designs = [...document.querySelectorAll('input[name="design"]:checked')].map(i=>i.value);
+  const sort = document.getElementById('sortSelect').value;
+
+  let filtered = properties.filter(p=>{
+    if(!types.includes(p.type)) return false;
+    if(!locs.some(l => p.loc.includes(l))) return false;
+    if(priceVal !== "all"){
+      const [min,max] = priceVal.split("-").map(Number);
+      if(p.price < min || p.price > max) return false;
+    }
+    if(bedsVal !== "all" && p.beds < Number(bedsVal)) return false;
+    if(p.design && !designs.includes(p.design)) return false;
+    return true;
+  });
+
+  if(sort === "price-asc") filtered.sort((a,b)=>a.price-b.price);
+  if(sort === "price-desc") filtered.sort((a,b)=>b.price-a.price);
+
+  document.getElementById('resultsCount').textContent = filtered.length + " propert" + (filtered.length===1?"y":"ies") + " found"
+    + (designs.length === 1 ? ` for ${designs[0]}` : "");
+
+  const grid = document.getElementById('listingsGrid');
+  grid.innerHTML = filtered.map(p => `
+    <article class="property-card" data-id="${esc(p.id)}" tabindex="0" role="button" aria-haspopup="dialog" aria-label="View details for ${esc(p.title)}">
+      <div class="property-thumb">
+        ${p.image ? `<img src="${esc(p.thumb || p.image)}" alt="" loading="lazy" decoding="async">` : (p.icon === "house" ? houseIcon : landIcon)}
+        ${p.tag ? `<span class="tag">${esc(p.tag)}</span>` : ""}
+        ${p.image && p.imageNote ? `<span class="img-note">${esc(p.imageNote)}</span>` : ""}
+      </div>
+      <div class="property-body">
+        <div class="title">${esc(p.title)}</div>
+        <div class="loc">${locPin} ${esc(p.loc)}</div>
+        <div class="property-price">${fmtPrice(p.price)}</div>
+        <div class="property-meta">
+          ${p.beds ? `<span>🛏 ${p.beds}</span><span>🛁 ${p.baths}</span>` : ""}
+          <span>▭ ${esc(p.area)}</span>
+        </div>
+        ${p.design ? `<div style="margin-top:8px; font-size:11.5px; color:var(--blue-dark); font-weight:600;">🏠 ${esc(p.design)}</div>` : ""}
+      </div>
+    </article>
+  `).join("") || `<p style="color:var(--text-faint); padding:30px 0;">No properties match your filters. Try adjusting them.</p>`;
+}
+
+document.getElementById('locFilters').innerHTML = LEListings.locationNames()
+  .map(n => `<label class="check-row"><input type="checkbox" name="location" value="${esc(n)}" checked> ${esc(n)}</label>`).join("");
+
+const designList = LEListings.designs();
+document.getElementById('designFilters').innerHTML = designList
+  .map(d => `<label class="check-row"><input type="checkbox" name="design" value="${esc(d.name)}" checked> ${esc(d.name)}</label>`).join("");
+if(!designList.length) document.getElementById('designGroup').style.display = 'none';
+if(new Set(properties.map(p => p.type)).size < 2) document.getElementById('typeGroup').style.display = 'none';
+
+document.querySelectorAll('#filterPanel input, #filterPanel select, #sortSelect').forEach(el=>{
+  el.addEventListener('input', render);
+  if(el.type !== 'text') el.addEventListener('change', render);
+});
+document.getElementById('resetFilters').addEventListener('click', ()=>{
+  document.querySelectorAll('input[name="type"]').forEach(i=>i.checked=true);
+  document.querySelectorAll('input[name="location"]').forEach(i=>i.checked=true);
+  document.querySelector('input[name="price"][value="all"]').checked = true;
+  document.querySelector('input[name="beds"][value="all"]').checked = true;
+  document.querySelectorAll('input[name="design"]').forEach(i=>i.checked=true);
+  document.getElementById('sortSelect').value = "default";
+  render();
+});
+
+const params = new URLSearchParams(window.location.search);
+if(params.get('type')){
+  const t = params.get('type') === 'House' ? 'For Sale' : params.get('type');
+  document.querySelectorAll('input[name="type"]').forEach(i=> i.checked = (i.value === t));
+}
+if(params.get('location')){
+  document.querySelectorAll('input[name="location"]').forEach(i=> i.checked = (i.value === params.get('location')));
+}
+if(params.get('price')){
+  const map = { "Below B$200,000":"0-250", "B$200,000 – B$400,000":"250-450", "Above B$400,000":"450-99999" };
+  const target = map[params.get('price')];
+  if(target){ const el = document.querySelector(`input[name="price"][value="${target}"]`); if(el) el.checked = true; }
+}
+
+render();
+
+const pdDialog    = document.getElementById('pdDialog');
+const pdScroll    = document.getElementById('pdScroll');
+const pdCopy      = document.getElementById('pdCopy');
+const pdCopyLabel = document.getElementById('pdCopyLabel');
+const pdMaterials = document.getElementById('pdMaterials');
+const pdQuote     = document.getElementById('pdQuote');
+const pdMap       = document.getElementById('pdMap');
+let pdCurrentId = null;
+let pdCopyTimer = null;
+
+const bigHouse = houseIcon.replace('width="46" height="46"', 'width="96" height="96"');
+const bigLand  = landIcon.replace('width="46" height="46"', 'width="96" height="96"');
+
+function sqftNum(p){ return parseInt(p.area.replace(/[^\d]/g, ''), 10); }
+function pdRows(rows){
+  return rows.map(([k, v]) => `<div><dt>${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join("");
+}
+
+function pdMarkup(p){
+  const isHouse = p.type === "For Sale";
+  const perSqft = "B$ " + Math.round(p.price / sqftNum(p)).toLocaleString();
+
+  const stats = isHouse
+    ? [[p.beds, "Bedrooms"], [p.baths, "Bathrooms"], [p.area, "Total area"], ...(p.floors ? [[p.floors, p.floors === 1 ? "Storey" : "Storeys"]] : [])]
+    : [[p.area, "Land area"], [perSqft, "Price per sqft"], [p.district || "—", "District"]];
+
+  const details = [
+    ["Reference", p.ref],
+    ["Property type", isHouse ? "House" : "Land"],
+    ["Listing", "For sale"]
+  ];
+  if(p.tenure) details.push(["Tenure", p.tenure]);
+  if(isHouse){
+    if(p.design) details.push(["Design", p.design]);
+    if(p.style)  details.push(["Style", p.style]);
+    details.push(["Price per sqft", perSqft], ["District", p.district || "—"]);
+  }
+
+  const secondTitle = isHouse ? "Rooms & layout" : "Land details";
+  const secondRows  = isHouse
+    ? [["Bedrooms", p.beds], ["Bathrooms", p.baths], ...(p.rooms || [])]
+    : (p.details || []);
+
+  const hero = p.image
+    ? `<img class="pd-hero-bg" src="${esc(p.thumb || p.image)}" alt="" aria-hidden="true"><img class="pd-hero-img" src="${esc(p.image)}" alt="${esc(p.title)}">`
+    : (isHouse ? bigHouse : bigLand);
+
+  return `
+    <div class="pd-hero ${p.image ? "has-img" : ""}">
+      ${hero}
+      ${p.tag ? `<span class="pd-tag">${esc(p.tag)}</span>` : ""}
+      ${p.image && p.imageNote ? `<span class="img-note">${esc(p.imageNote)}</span>` : ""}
+    </div>
+
+    <div class="pd-content">
+      <div class="pd-head">
+        <div>
+          <div class="pd-chips">
+            <span class="pd-chip">${isHouse ? "House · For Sale" : "Land · For Sale"}</span>
+            <span class="pd-chip ref">Ref ${esc(p.ref)}</span>
+          </div>
+          <h2 id="pdTitle">${esc(p.title)}</h2>
+          <div class="pd-loc">${locPin} ${esc(p.loc)}</div>
+        </div>
+        <div class="pd-price">
+          <span class="label">Price</span>
+          <span class="value">${fmtPrice(p.price)}</span>
+          <span class="sub">${perSqft} per sqft</span>
+        </div>
+      </div>
+
+      <div class="pd-stats" style="--n:${stats.length}">
+        ${stats.map(([v, k]) => `<div class="pd-stat"><div class="v">${esc(v)}</div><div class="k">${esc(k)}</div></div>`).join("")}
+      </div>
+
+      <div class="pd-grid">
+        <div class="pd-main">
+          ${p.desc ? `<section>
+            <h3>About this property</h3>
+            <p>${esc(p.desc)}</p>
+          </section>` : ""}
+          ${p.address ? `<section>
+            <h3>Address</h3>
+            <p>${esc(p.address)}</p>
+          </section>` : ""}
+          ${(p.features || []).length ? `<section>
+            <h3>Features &amp; highlights</h3>
+            <ul class="pd-features">${p.features.map(f => `<li>${esc(f)}</li>`).join("")}</ul>
+          </section>` : ""}
+        </div>
+        <aside class="pd-side">
+          <section class="pd-panel">
+            <h3>Property details</h3>
+            <dl class="pd-dl">${pdRows(details)}</dl>
+          </section>
+          ${secondRows.length ? `<section class="pd-panel">
+            <h3>${secondTitle}</h3>
+            <dl class="pd-dl">${pdRows(secondRows)}</dl>
+          </section>` : ""}
+        </aside>
+      </div>
+    </div>`;
+}
+
+function pdSetUrl(id){
+  try{
+    const u = new URL(window.location.href);
+    if(id) u.searchParams.set('property', id); else u.searchParams.delete('property');
+    history.replaceState(null, '', u);
+  }catch(_){}
+}
+function pdShareUrl(id){
+  const u = new URL(window.location.href);
+  u.search = ''; u.hash = '';
+  u.searchParams.set('property', id);
+  return u.href;
+}
+
+function openDetail(id){
+  const p = properties.find(x => x.id === id);
+  if(!p) return;
+  pdCurrentId = id;
+  pdScroll.innerHTML = pdMarkup(p);
+  pdScroll.scrollTop = 0;
+  pdMap.href = 'GeoportalMapping.html?property=' + encodeURIComponent(p.id);
+  pdMaterials.hidden = (p.type !== "For Sale");
+  pdQuote.hidden     = (p.type === "For Sale");
+  pdMaterials.href = 'MaterialOptions.html?property=' + encodeURIComponent(p.id);
+  clearTimeout(pdCopyTimer);
+  pdCopyLabel.textContent = "Copy link";
+
+  if(!pdDialog.open){
+    const sw = window.innerWidth - document.documentElement.clientWidth;
+    if(sw > 0) document.documentElement.style.paddingRight = sw + 'px';
+    document.documentElement.classList.add('pd-lock');
+    pdDialog.showModal();
+  }
+  pdSetUrl(id);
+}
+
+pdDialog.addEventListener('close', () => {
+  document.documentElement.classList.remove('pd-lock');
+  document.documentElement.style.paddingRight = '';
+  pdCurrentId = null;
+  pdSetUrl(null);
+});
+document.getElementById('pdClose').addEventListener('click', () => pdDialog.close());
+pdDialog.addEventListener('click', e => { if(e.target === pdDialog) pdDialog.close(); });
+
+const grid = document.getElementById('listingsGrid');
+grid.addEventListener('click', e => {
+  const card = e.target.closest('.property-card[data-id]');
+  if(card) openDetail(card.dataset.id);
+});
+grid.addEventListener('keydown', e => {
+  if((e.key === 'Enter' || e.key === ' ') && e.target.matches('.property-card[data-id]')){
+    e.preventDefault();
+    openDetail(e.target.dataset.id);
+  }
+});
+
+pdQuote.addEventListener('click', () => {
+  const p = properties.find(x => x.id === pdCurrentId);
+  if(p) LandQuote.open(p);
+});
+
+pdCopy.addEventListener('click', async () => {
+  if(!pdCurrentId) return;
+  const url = pdShareUrl(pdCurrentId);
+  let ok = false;
+  try{
+    await navigator.clipboard.writeText(url);
+    ok = true;
+  }catch(_){
+    const ta = document.createElement('textarea');
+    ta.value = url; ta.setAttribute('readonly', '');
+    ta.style.cssText = 'position:fixed;opacity:0;top:0;left:0;';
+    pdDialog.appendChild(ta);
+    ta.select();
+    try{ ok = document.execCommand('copy'); }catch(__){}
+    ta.remove();
+  }
+  pdCopyLabel.textContent = ok ? "Link copied" : "Couldn't copy";
+  clearTimeout(pdCopyTimer);
+  pdCopyTimer = setTimeout(() => { pdCopyLabel.textContent = "Copy link"; }, 2000);
+});
+
+if(params.get('property')) openDetail(params.get('property'));
+});
+</script>
+<script src="Js/Auth.js"></script>
+</body>
+</html>

@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Visualization — Liakat Enterprise</title>
+<link rel="stylesheet" href="Css/Style.css">
+<script src="Js/Config.js"></script>
+<script src="Js/Db.js"></script>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container">
+    <a href="index.html" class="brand">
+      <span class="brand-mark">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M9 21v-6h6v6"/></svg>
+      </span>
+      <span class="brand-text">
+        <div class="name">Liakat Enterprise</div>
+      </span>
+    </a>
+    <nav class="main-nav">
+      <a href="index.html">Home</a>
+      <a href="PropertyListings.html">Property Listings</a>
+      <a href="MaterialOptions.html">Material Options</a>
+      <a href="AiVisualization.html" class="active">AI Visualization</a>
+      <a href="GeoportalMapping.html">Geoportal Mapping</a>
+      <div class="nav-more">
+        <a href="#" class="nav-more-trigger">More
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+        </a>
+        <div class="nav-more-panel">
+          <a href="ProjectUpdates.html">Project Updates</a>
+          <a href="PaymentTracking.html">Payment Tracking</a>
+          <a href="VariationOrders.html">Variation Orders</a>
+        </div>
+      </div>
+    </nav>
+    <div class="header-actions">
+      <a href="#" class="avatar-btn" aria-label="Account">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+      </a>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+  <div class="page-header">
+    <h1>AI Interior Design Visualization</h1>
+  </div>
+</div>
+
+<section style="padding-bottom:56px;">
+  <div class="container">
+    <div class="card card-pad quote-banner" id="quoteBanner" hidden>
+      <div>
+        <h3 id="qbTitle"></h3>
+        <p>You're checking how your choices look before you submit. Your selection is saved.</p>
+        <div class="qb-items" id="qbItems"></div>
+      </div>
+      <a class="btn btn-primary" id="qbBack" href="MaterialOptions.html">Back to my quote</a>
+    </div>
+
+    <div class="ai-layout">
+
+      <div class="card card-pad">
+        <div class="stepper" id="stepper">
+          <div class="step-item active" data-step="1">
+            <div class="step-num">1</div>
+            <div class="step-text">
+              <div class="t">Choose Room Type</div>
+              <div class="d">Pick the space to preview</div>
+            </div>
+          </div>
+          <div class="step-item" data-step="2">
+            <div class="step-num">2</div>
+            <div class="step-text">
+              <div class="t">Style &amp; Materials</div>
+              <div class="d">Pick the finishes</div>
+            </div>
+          </div>
+          <div class="step-item" data-step="3">
+            <div class="step-num">3</div>
+            <div class="step-text">
+              <div class="t">Generate &amp; View</div>
+              <div class="d">Preview your room</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card card-pad">
+
+        <div id="panel1">
+          <h3 style="font-size:14px; margin-bottom:4px;">Select Room Type</h3>
+          <p style="font-size:12.5px; color:var(--text-faint); margin-bottom:6px;">Choose the room you'd like to preview.</p>
+
+          <div class="room-type-grid" id="roomGrid">
+            <button type="button" class="room-type selected" data-room="living">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 13v6h16v-6"/><path d="M4 13a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2"/><path d="M6 11V8a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v3"/><path d="M6 19v2M18 19v2"/></svg>
+              Living Room
+            </button>
+            <button type="button" class="room-type" data-room="bedroom">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 18v-6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v6"/><path d="M3 18h18M5 10V6h5v4"/><path d="M3 21v-3M21 21v-3"/></svg>
+              Bedroom
+            </button>
+            <button type="button" class="room-type" data-room="bathroom">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 12h16v3a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4v-3Z"/><path d="M6 12V6a2 2 0 0 1 3.5-1.3"/><path d="M7 19l-1 2M17 19l1 2"/></svg>
+              Bathroom
+            </button>
+          </div>
+
+          <button type="button" class="btn btn-primary" id="toStep2" style="margin-top:20px; width:140px;">Next</button>
+        </div>
+
+        <div id="panel2" hidden>
+          <h3 style="font-size:14px; margin-bottom:4px;">Select Style &amp; Materials</h3>
+          <p style="font-size:12.5px; color:var(--text-faint); margin-bottom:12px;">Pick the finishes to preview in your <span id="roomLabel">room</span>.</p>
+
+          <p class="hint" id="quoteHint" hidden style="margin:-6px 0 14px;"></p>
+
+          <div class="ls-grid" id="pickers"></div>
+
+          <div style="display:flex; gap:10px; margin-top:6px;">
+            <button type="button" class="btn btn-outline" id="toStep1Back">Back</button>
+            <button type="button" class="btn btn-primary" id="genBtn">Generate</button>
+          </div>
+        </div>
+
+        <div id="panel3" hidden>
+          <div id="outputPanel" aria-live="polite"></div>
+          <div class="output-caption">
+            <div class="t" id="outTitle">Preview</div>
+            <div class="d" id="outDesc"></div>
+          </div>
+          <div style="display:flex; gap:10px; margin-top:16px; justify-content:center; flex-wrap:wrap;">
+            <button type="button" class="btn btn-outline" id="editChoices">Edit choices</button>
+            <a class="btn btn-primary" id="applyToQuote" href="MaterialOptions.html" hidden>Use these materials in my quote</a>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="brand">
+      <span class="brand-mark" style="width:30px;height:30px;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" width="16" height="16"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg>
+      </span>
+      <span class="brand-text">
+        <div class="name">Liakat Enterprise</div>
+      </span>
+    </div>
+    <div class="footer-links">
+      <span>📍 Brunei Darussalam</span>
+    </div>
+  </div>
+</footer>
+
+<script src="Js/Properties.js"></script>
+<script src="Js/Listings.js"></script>
+<script src="Js/Catalog.js"></script>
+<script src="Js/Store.js"></script>
+<script>
+LEDb.ready.then(function () {
+(function () {
+  "use strict";
+  const $ = id => document.getElementById(id);
+  const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, ch => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch]));
+  const C = window.LECatalog, S = window.LEStore;
+
+  const params = new URLSearchParams(window.location.search);
+  let quoteProp = null, quoteDraft = null;
+  if (params.get("from") === "quote") {
+    const prop = properties.find(p => p.id === params.get("property") && p.type === "For Sale");
+    const draft = prop ? S.getDraft(prop.id) : null;
+    if (prop && draft) {
+      quoteProp = prop; quoteDraft = draft;
+      draft.aiVisited = true;
+      S.saveDraft(prop.id, draft);
+      const q = C.computeQuote(prop, draft.picks);
+      $("qbTitle").textContent = "Your quote " + draft.quoteNo + " for " + prop.title;
+      $("qbItems").innerHTML = q.lines.map(l =>
+        `<span><i style="background:${l.imgSm ? `url('${esc(l.imgSm)}') center/cover` : l.color}"></i>${esc(l.label)}: ${esc(l.name)}</span>`).join("");
+      $("qbBack").href = "MaterialOptions.html?property=" + encodeURIComponent(prop.id) + "#summary";
+      $("quoteBanner").hidden = false;
+    }
+  }
+
+  const IMG_DIR = "Img/Ai/", IMG_EXT = ".jpg";
+  const ROOMS = {
+    living:   { name: "Living Room", folder: "LivingRoom", fields: [
+      { slot: "floor", label: "Floor tile",    type: "Floor Tile" },
+      { slot: "wall",  label: "Wall tile",     type: "Wall Tile" },
+      { slot: "main",  label: "Main door",     type: "Main Door" } ] },
+    bedroom:  { name: "Bedroom", folder: "Bedroom", fields: [
+      { slot: "floor",    label: "Floor tile",    type: "Floor Tile" },
+      { slot: "wall",     label: "Wall tile",     type: "Wall Tile" },
+      { slot: "interior", label: "Interior door", type: "Interior Door" } ] },
+    bathroom: { name: "Bathroom", folder: "Bathroom", fields: [
+      { slot: "bath",     label: "Bathroom tile", type: "Bathroom Tile" },
+      { slot: "sanitary", label: "Sanitary ware set", type: "Sanitary Set" } ] }
+  };
+
+  const picks = {};
+  C.slotOrder.forEach(k => {
+    const fromQuote = quoteDraft && C.byCode(quoteDraft.picks[k]);
+    picks[k] = (fromQuote || C.standardFor(k)).code;
+  });
+  let room = "living";
+
+  const swatch = item => item.imgSm ? `url('${esc(item.imgSm)}') center/cover` : item.color;
+
+  function goStep(n) {
+    [1, 2, 3].forEach(i => {
+      $("panel" + i).hidden = i !== n;
+      const item = document.querySelector(`.step-item[data-step="${i}"]`);
+      item.classList.toggle("active", i === n);
+      item.classList.toggle("done", i < n);
+    });
+    window.scrollTo({ top: document.querySelector(".ai-layout").getBoundingClientRect().top + window.scrollY - 90, behavior: "smooth" });
+  }
+
+  $("roomGrid").addEventListener("click", e => {
+    const btn = e.target.closest(".room-type"); if (!btn) return;
+    document.querySelectorAll(".room-type").forEach(b => b.classList.toggle("selected", b === btn));
+    room = btn.dataset.room;
+  });
+  $("toStep2").addEventListener("click", () => {
+    $("roomLabel").textContent = ROOMS[room].name.toLowerCase();
+    renderPickers();
+    goStep(2);
+  });
+  $("toStep1Back").addEventListener("click", () => goStep(1));
+
+  function renderPickers() {
+    $("pickers").innerHTML = ROOMS[room].fields.map((f, i, all) => {
+      const items = C.items.filter(x => x.type === f.type);
+      const wide = all.length % 2 === 1 && i === all.length - 1;
+      return `<div class="field ${wide ? "span2" : ""}">
+        <label for="pick_${f.slot}">${esc(f.label)}</label>
+        <div style="display:flex; align-items:center; gap:10px;">
+          <span class="mat-swatch-sm" id="sw_${f.slot}" style="background:${swatch(C.byCode(picks[f.slot]))}"></span>
+          <select id="pick_${f.slot}" data-slot="${f.slot}" style="flex:1;">
+            ${items.map(x => `<option value="${x.code}" ${x.code === picks[f.slot] ? "selected" : ""}>${esc(x.name)}</option>`).join("")}
+          </select>
+        </div>
+      </div>`;
+    }).join("");
+  }
+  $("pickers").addEventListener("change", e => {
+    const sel = e.target.closest("select[data-slot]"); if (!sel) return;
+    picks[sel.dataset.slot] = sel.value;
+    $("sw_" + sel.dataset.slot).style.background = swatch(C.byCode(sel.value));
+  });
+
+  function currentFile() {
+    const r = ROOMS[room];
+    return IMG_DIR + r.folder + "/" + r.fields.map(f => picks[f.slot]).join("") + IMG_EXT;
+  }
+  $("genBtn").addEventListener("click", () => {
+    const btn = $("genBtn"), r = ROOMS[room], file = currentFile();
+    const chosen = r.fields.map(f => ({ label: f.label, item: C.byCode(picks[f.slot]) }));
+    btn.disabled = true; btn.textContent = "Loading\u2026";
+
+    const show = html => {
+      $("outputPanel").innerHTML = html;
+      $("outTitle").textContent = r.name;
+      $("outDesc").textContent = chosen.map(c => c.label + ": " + c.item.name).join("  \u00b7  ");
+      btn.disabled = false; btn.textContent = "Generate";
+      goStep(3);
+    };
+    const img = new Image();
+    img.onload = () => {
+      show(`<img src="${esc(file)}" alt="${esc(r.name)} with ${esc(chosen.map(c => c.item.name).join(", "))}">`);
+    };
+    img.onerror = () => {
+      show(`<div class="ai-soon">
+        <strong>Preview coming soon</strong>
+        <span>We haven't added a picture for this combination yet.</span>
+        <div class="ai-soon-items">${chosen.map(c => `<span><i style="background:${swatch(c.item)}"></i>${esc(c.item.name)}</span>`).join("")}</div>
+      </div>`);
+    };
+    img.src = file;
+  });
+  $("editChoices").addEventListener("click", () => goStep(2));
+
+  if (quoteDraft) {
+    $("quoteHint").hidden = false;
+    $("quoteHint").innerHTML = "Prefilled with the materials from your quote. Change any of them here just to preview \u2014 your quote isn't affected until you choose \u201cUse these materials in my quote\u201d.";
+    $("applyToQuote").hidden = false;
+    $("applyToQuote").addEventListener("click", e => {
+      e.preventDefault();
+      const d = S.getDraft(quoteProp.id) || quoteDraft;
+      Object.keys(picks).forEach(k => { d.picks[k] = picks[k]; });
+      S.saveDraft(quoteProp.id, d);
+      window.location.href = "MaterialOptions.html?property=" + encodeURIComponent(quoteProp.id) + "#summary";
+    });
+  }
+
+})();
+});
+</script>
+<script src="Js/Auth.js"></script>
+</body>
+</html>

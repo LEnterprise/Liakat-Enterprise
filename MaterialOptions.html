@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Material Options — Liakat Enterprise</title>
+<link rel="stylesheet" href="Css/Style.css">
+<script src="Js/Config.js"></script>
+<script src="Js/Db.js"></script>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container">
+    <a href="index.html" class="brand">
+      <span class="brand-mark">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M9 21v-6h6v6"/></svg>
+      </span>
+      <span class="brand-text">
+        <div class="name">Liakat Enterprise</div>
+      </span>
+    </a>
+    <nav class="main-nav">
+      <a href="index.html">Home</a>
+      <a href="PropertyListings.html">Property Listings</a>
+      <a href="MaterialOptions.html" class="active">Material Options</a>
+      <a href="AiVisualization.html">AI Visualization</a>
+      <a href="GeoportalMapping.html">Geoportal Mapping</a>
+      <div class="nav-more">
+        <a href="#" class="nav-more-trigger">More
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+        </a>
+        <div class="nav-more-panel">
+          <a href="ProjectUpdates.html">Project Updates</a>
+          <a href="PaymentTracking.html">Payment Tracking</a>
+          <a href="VariationOrders.html">Variation Orders</a>
+        </div>
+      </div>
+    </nav>
+    <div class="header-actions">
+      <a href="#" class="avatar-btn" aria-label="Account">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+      </a>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+  <div class="page-header">
+    <h1>Material Options</h1>
+  </div>
+</div>
+
+<section style="padding-bottom:50px;">
+  <div class="container">
+
+    <div class="card card-pad property-bar" id="propertyBar">
+      <div class="pb-left">
+        <label for="propSelect">Choosing materials for</label>
+        <div class="pb-pick">
+          <select id="propSelect"></select>
+          <a href="PropertyListings.html" class="btn-text" id="pbListing">Browse listings</a>
+        </div>
+      </div>
+      <div class="pb-prices" id="pbPrices" aria-live="polite"></div>
+    </div>
+
+    <div class="vo-tabs" id="matTabs" style="margin-bottom:22px;">
+      <button type="button" class="active" data-cat="tiles" aria-pressed="true">▦ Tiles</button>
+      <button type="button" data-cat="doors" aria-pressed="false">▯ Doors</button>
+      <button type="button" data-cat="sanitary" aria-pressed="false">⬡ Sanitary Wares</button>
+    </div>
+
+    <div class="material-layout">
+      <div>
+        <div class="chip-row" id="chipRow" style="margin-bottom:16px;"></div>
+        <div class="material-grid" id="matGrid"></div>
+      </div>
+      <aside class="card card-pad selected-panel" id="selPanel" aria-label="Selected item"></aside>
+    </div>
+
+    <div class="card card-pad quote-summary" id="summary" aria-live="polite"></div>
+
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="brand">
+      <span class="brand-mark" style="width:30px;height:30px;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" width="16" height="16"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg>
+      </span>
+      <span class="brand-text">
+        <div class="name">Liakat Enterprise</div>
+      </span>
+    </div>
+    <div class="footer-links">
+      <span>📍 Brunei Darussalam</span>
+    </div>
+  </div>
+</footer>
+
+<dialog class="dlg" id="quoteDialog" aria-labelledby="qdTitle">
+  <div id="qdForm">
+    <form id="quoteForm" novalidate style="display:flex; flex-direction:column; min-height:0;">
+      <div class="dlg-body">
+        <h2 id="qdTitle">Submit your quote request</h2>
+        <p>Tell us how to reach you. Our team will contact you to confirm quantities and your final price.</p>
+        <div class="dlg-quote">
+          <div><span class="k">Your quote number</span><span class="vo-id" id="qdNo"></span></div>
+          <div class="price"><span class="k">Your price</span><span id="qdPrice"></span></div>
+        </div>
+        <div class="form-error" id="qdError" hidden></div>
+        <div class="field">
+          <label for="qName">Full name</label>
+          <input id="qName" name="name" type="text" autocomplete="name" aria-describedby="qNameErr" required>
+          <div class="err" id="qNameErr"></div>
+        </div>
+        <div class="field">
+          <label for="qPhone">Phone number</label>
+          <input id="qPhone" name="phone" type="tel" autocomplete="tel" inputmode="tel" placeholder="+673 712 3456" aria-describedby="qPhoneErr" required>
+          <div class="err" id="qPhoneErr"></div>
+        </div>
+        <div class="field">
+          <label for="qEmail">Email address</label>
+          <input id="qEmail" name="email" type="email" autocomplete="email" placeholder="name@example.com" aria-describedby="qEmailErr" required>
+          <div class="err" id="qEmailErr"></div>
+        </div>
+      </div>
+      <div class="dlg-foot stack">
+        <button type="button" class="btn btn-outline" id="qdCancel">Cancel</button>
+        <button type="submit" class="btn btn-primary" id="qdSubmit">Submit quote request</button>
+      </div>
+    </form>
+  </div>
+
+  <div id="qdDone" hidden>
+    <div class="dlg-body">
+      <div class="dlg-icon ok">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>
+      </div>
+      <h2 id="qdDoneTitle" tabindex="-1">Quote request sent</h2>
+      <p>Thank you, <span id="qdDoneName"></span>. Our team will contact you to confirm quantities and your final price.</p>
+    </div>
+    <div class="dlg-foot stack">
+      <a class="btn btn-outline" href="PropertyListings.html">Back to listings</a>
+      <button type="button" class="btn btn-primary" id="qdDoneBtn">Done</button>
+    </div>
+  </div>
+</dialog>
+
+<script src="Js/Properties.js"></script>
+<script src="Js/Listings.js"></script>
+<script src="Js/Catalog.js"></script>
+<script src="Js/Store.js"></script>
+<script>
+LEDb.ready.then(function () {
+(function () {
+  "use strict";
+  const C = window.LECatalog, S = window.LEStore;
+  const $ = id => document.getElementById(id);
+  const esc = s => String(s).replace(/[&<>"']/g, ch => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[ch]));
+
+  const houses = properties.filter(p => p.type === "For Sale");
+  const state = { cat: "tiles", type: "All", preview: "T001", property: null, draft: null, submitted: null };
+  let statusTimer = null;
+
+  const where = p => (p.areaName && p.title.includes(p.areaName)) ? p.title : p.title + " in " + p.loc;
+  const plural = t => t.charAt(0) + t.slice(1).toLowerCase() + "s";
+  const itemsIn = (cat, type) => C.items.filter(i => i.cat === cat && (type === "All" || i.type === type));
+  const quote = () => state.property ? C.computeQuote(state.property, state.draft.picks) : null;
+
+  function loadProperty(id) {
+    const p = houses.find(h => h.id === id) || null;
+    state.property = p;
+    if (!p) { state.draft = null; return; }
+    let d = S.getDraft(p.id);
+    if (!d || !d.quoteNo) d = { quoteNo: S.newQuoteNo(), picks: {}, aiVisited: false };
+    d.picks = Object.assign(C.standardPicks(), d.picks || {});
+    state.draft = d;
+    S.saveDraft(p.id, d);
+    S.setLastProperty(p.id);
+  }
+  function saveDraft() { if (state.property) S.saveDraft(state.property.id, state.draft); }
+  function syncUrl() {
+    try {
+      const u = new URL(window.location.href);
+      if (state.property) u.searchParams.set("property", state.property.id); else u.searchParams.delete("property");
+      history.replaceState(null, "", u);
+    } catch (_) {}
+  }
+
+  function renderBar() {
+    const q = quote();
+    $("propSelect").value = state.property ? state.property.id : "";
+    const link = $("pbListing");
+    link.textContent = state.property ? "View listing" : "Browse listings";
+    link.href = state.property ? "PropertyListings.html?property=" + encodeURIComponent(state.property.id) : "PropertyListings.html";
+    $("pbPrices").innerHTML = q ? `
+      <div><span class="k">Listed price</span><span class="v">${C.fmt(q.listedPrice)}</span></div>
+      <div><span class="k">Material upgrades</span><span class="v ${q.upgradeTotal ? "up" : ""}">${q.upgradeTotal ? C.fmtDelta(q.upgradeTotal) : "None yet"}</span></div>
+      <div class="total"><span class="k">Your price</span><span class="v">${C.fmt(q.total)}</span></div>`
+      : `<p class="pb-empty">Choose a property to see how your choices change its price.</p>`;
+  }
+
+  function renderTabs() {
+    document.querySelectorAll("#matTabs button").forEach(b => {
+      const on = b.dataset.cat === state.cat;
+      b.classList.toggle("active", on);
+      b.setAttribute("aria-pressed", on);
+    });
+  }
+
+  function renderChips() {
+    const types = [...new Set(C.items.filter(i => i.cat === state.cat).map(i => i.type))];
+    const row = $("chipRow");
+    row.hidden = types.length < 2;
+    row.innerHTML = ["All", ...types].map(t =>
+      `<button type="button" class="chip ${state.type === t ? "active" : ""}" data-type="${esc(t)}" aria-pressed="${state.type === t}">${t === "All" ? "All" : plural(t)}</button>`
+    ).join("");
+  }
+
+  function renderGrid() {
+    const list = itemsIn(state.cat, state.type);
+    if (!list.some(i => i.code === state.preview)) state.preview = list[0].code;
+    const picks = state.draft ? Object.values(state.draft.picks) : [];
+    $("matGrid").innerHTML = list.map(i => `
+      <figure class="material-tile ${i.code === state.preview ? "selected" : ""}" tabindex="0" role="button"
+              data-code="${i.code}" data-focus-key="tile-${i.code}" aria-pressed="${i.code === state.preview}"
+              aria-label="${esc(i.name)}, ${esc(C.fmtPrice(i))}${i.standard ? ", standard finish" : ""}${picks.includes(i.code) ? ", in your selection" : ""}">
+        <div class="material-swatch" style="background:${i.imgSm ? `url('${esc(i.imgSm)}') center/cover` : i.color};"></div>
+        ${i.standard ? `<span class="mat-flag">Standard</span>` : ""}
+        ${picks.includes(i.code) ? `<span class="mat-check" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span>` : ""}
+        <figcaption>${esc(i.name)}<br><span class="code">${i.code}, ${esc(C.fmtPrice(i))}</span></figcaption>
+      </figure>`).join("");
+  }
+
+  function renderPanel() {
+    const it = C.byCode(state.preview);
+    const slot = C.slotForType(it.type);
+    const p = state.property;
+    let cost, btn;
+
+    if (!p) {
+      cost = `<div class="cost-box"><div class="cb-title">Cost for your home</div><div class="cb-line">Choose a property above to see what this costs for your home.</div></div>`;
+      btn = `<button type="button" class="btn btn-primary btn-block" id="addBtn" disabled>Choose a property first</button>`;
+    } else {
+      const pc = C.previewCost(p, it);
+      const current = C.byCode(state.draft.picks[slot.key]);
+      const inSel = current.code === it.code;
+      if (it.standard) {
+        cost = `<div class="cost-box standard"><div class="cb-title">Standard finish, included</div>
+                <div class="cb-line">For ${slot.label.toLowerCase()} (${slot.where.toLowerCase()}). Already in the listed price.</div></div>`;
+      } else {
+        const diff = it.price - pc.std.price;
+        cost = `<div class="cost-box ${pc.delta > 0 ? "upgrade" : ""}"><div class="cb-title">${C.fmtDelta(pc.delta)} for your home</div>
+                <div class="cb-line">About ${C.fmtQty(pc.qty, it.unit)} × ${C.fmt(Math.abs(diff))} ${diff >= 0 ? "more" : "less"} than ${esc(pc.std.name)} (standard).</div>
+                <div class="cb-line">For ${slot.label.toLowerCase()} (${slot.where.toLowerCase()}).</div></div>`;
+      }
+      const currentLine = inSel ? "" : `<div class="cb-line" style="margin-top:10px; font-size:12.5px; color:var(--text-faint);">Currently chosen for ${slot.label.toLowerCase()}: <b style="color:var(--navy)">${esc(current.name)}</b></div>`;
+      cost += currentLine;
+      btn = inSel
+        ? `<button type="button" class="btn btn-primary btn-block" id="addBtn" aria-disabled="true">In your selection</button>`
+        : `<button type="button" class="btn btn-primary btn-block" id="addBtn">Add to Selection</button>`;
+    }
+
+    $("selPanel").innerHTML = `
+      <h3 style="font-size:14px; margin-bottom:14px;">Selected Item</h3>
+      <div class="swatch-lg" style="background:${it.img ? `url('${esc(it.img)}') center/cover` : it.color};"></div>
+      <div style="font-weight:700; color:var(--navy); font-size:15px;">${esc(it.name)}</div>
+      <div style="color:var(--text-faint); font-size:12.5px; margin-bottom:6px;">${it.code}</div>
+      <div class="spec-row"><span>Type</span><span>${esc(it.type)}</span></div>
+      <div class="spec-row"><span>Size</span><span>${esc(it.size)}</span></div>
+      <div class="spec-row"><span>Finish</span><span>${esc(it.finish)}</span></div>
+      <div class="spec-row"><span>Price</span><span>${esc(C.fmtPrice(it))}</span></div>
+      ${cost}
+      <div style="margin-top:16px;">${btn}</div>
+      <div class="panel-status" id="panelStatus" role="status"></div>`;
+  }
+
+  function renderSummary() {
+    const box = $("summary");
+    const q = quote();
+    if (!q) {
+      box.innerHTML = `<div class="qs-head"><div><h2>Your quote summary</h2></div></div>
+        <p class="qs-empty">Choose a property above and your quote will build here as you pick materials.</p>`;
+      return;
+    }
+    const p = state.property;
+    box.innerHTML = `
+      <div class="qs-head">
+        <div>
+          <h2>Your quote summary</h2>
+          <p class="sub">${esc(where(p))}</p>
+        </div>
+        <div class="qs-no"><span class="k">Quote number</span><span class="vo-id" id="qsNo">${esc(state.draft.quoteNo)}</span></div>
+      </div>
+
+      <div class="qs-rows">
+        <div class="qs-row qs-headrow" aria-hidden="true">
+          <span style="grid-area:item">Item</span><span style="grid-area:choice">Your choice</span>
+          <span style="grid-area:qty">Estimated quantity</span><span style="grid-area:cost">Cost vs standard</span><span style="grid-area:action"></span>
+        </div>
+        ${q.lines.map(l => `
+          <div class="qs-row">
+            <div class="qs-item">${l.label}<small>${l.where}</small></div>
+            <div class="qs-choice"><span class="qs-dot" style="background:${l.imgSm ? `url('${esc(l.imgSm)}') center/cover` : l.color}"></span>
+              <span><span class="nm">${esc(l.name)}</span><span class="cd">${l.code}${l.isUpgrade ? "" : ", standard"}</span></span></div>
+            <div class="qs-qty">${C.fmtQty(l.qty, l.unit)}</div>
+            <div class="qs-cost ${l.upgradeCost > 0 ? "up" : ""}">${C.fmtDelta(l.upgradeCost)}</div>
+            <div class="qs-action"><button type="button" class="btn-text" data-action="change" data-slot="${l.slot}" data-focus-key="chg-${l.slot}" aria-label="Change ${l.label.toLowerCase()}">Change</button></div>
+          </div>`).join("")}
+      </div>
+
+      <div class="qs-foot">
+        <p class="qs-note">Quantities are estimates based on the size of this home. Our team confirms final quantities and your final price after you submit.</p>
+        <div class="qs-totals">
+          <div class="tr"><span>Listed price</span><b>${C.fmt(q.listedPrice)}</b></div>
+          <div class="tr"><span>Material upgrades</span><b>${q.upgradeTotal ? C.fmtDelta(q.upgradeTotal) : "None"}</b></div>
+          <div class="tr grand"><span>Your price</span><b>${C.fmt(q.total)}</b></div>
+        </div>
+      </div>
+
+      <div class="qs-actions">
+        <button type="button" class="btn btn-outline" id="qsReset" ${q.upgradeTotal === 0 && q.lines.every(l => !l.isUpgrade) ? 'aria-disabled="true"' : ""}>Reset to standard finishes</button>
+        <button type="button" class="btn btn-primary" id="qsSubmit">Submit quote request</button>
+      </div>`;
+  }
+
+  function renderAll() {
+    const a = document.activeElement;
+    const key = a && (a.dataset && a.dataset.focusKey || a.id) || null;
+    renderBar(); renderTabs(); renderChips(); renderGrid(); renderPanel(); renderSummary();
+    if (key) {
+      const el = document.querySelector(`[data-focus-key="${key}"]`) || document.getElementById(key);
+      if (el && el !== document.activeElement) el.focus({ preventScroll: true });
+    }
+  }
+
+  function selectTile(code) { state.preview = code; renderAll(); }
+  $("matGrid").addEventListener("click", e => { const t = e.target.closest(".material-tile"); if (t) selectTile(t.dataset.code); });
+  $("matGrid").addEventListener("keydown", e => {
+    if ((e.key === "Enter" || e.key === " ") && e.target.matches(".material-tile")) { e.preventDefault(); selectTile(e.target.dataset.code); }
+  });
+
+  $("matTabs").addEventListener("click", e => {
+    const b = e.target.closest("button[data-cat]"); if (!b) return;
+    state.cat = b.dataset.cat; state.type = "All";
+    state.preview = itemsIn(state.cat, "All")[0].code;
+    renderAll();
+  });
+  $("chipRow").addEventListener("click", e => {
+    const b = e.target.closest(".chip"); if (!b) return;
+    state.type = b.dataset.type; renderAll();
+  });
+
+  $("propSelect").addEventListener("change", e => { loadProperty(e.target.value); syncUrl(); renderAll(); });
+
+  $("selPanel").addEventListener("click", e => {
+    const btn = e.target.closest("#addBtn");
+    if (!btn || btn.disabled || btn.getAttribute("aria-disabled") === "true") return;
+    const it = C.byCode(state.preview), slot = C.slotForType(it.type);
+    state.draft.picks[slot.key] = it.code;
+    saveDraft(); renderAll();
+    const st = $("panelStatus");
+    if (st) st.textContent = "Added. Your quote below is updated.";
+    clearTimeout(statusTimer);
+    statusTimer = setTimeout(() => { const s = $("panelStatus"); if (s) s.textContent = ""; }, 3000);
+  });
+
+  $("summary").addEventListener("click", e => {
+    const chg = e.target.closest('[data-action="change"]');
+    if (chg) {
+      const slot = C.slots[chg.dataset.slot];
+      const cur = C.byCode(state.draft.picks[slot.key]);
+      state.cat = cur.cat; state.type = slot.type; state.preview = cur.code;
+      renderAll();
+      $("matTabs").scrollIntoView({ behavior: "smooth", block: "start" });
+      return;
+    }
+    const reset = e.target.closest("#qsReset");
+    if (reset) {
+      if (reset.getAttribute("aria-disabled") === "true") return;
+      state.draft.picks = C.standardPicks(); saveDraft(); renderAll(); return;
+    }
+    if (e.target.closest("#qsSubmit")) startSubmit();
+  });
+
+  const quoteDialog = $("quoteDialog");
+
+  function lockScroll() {
+    const de = document.documentElement;
+    if (de.classList.contains("pd-lock")) return;
+    const sw = window.innerWidth - de.clientWidth;
+    if (sw > 0) de.style.paddingRight = sw + "px";
+    de.classList.add("pd-lock");
+  }
+  function unlockScroll() {
+    if (document.querySelector("dialog[open]")) return;
+    document.documentElement.classList.remove("pd-lock");
+    document.documentElement.style.paddingRight = "";
+  }
+  function openDialog(d) { lockScroll(); d.showModal(); }
+  [quoteDialog].forEach(d => {
+    d.addEventListener("close", unlockScroll);
+    d.addEventListener("click", e => { if (e.target === d) d.close(); });
+  });
+
+  function startSubmit() {
+    if (!state.property) return;
+    openQuoteForm();
+  }
+
+  function showFormView() { $("qdForm").hidden = false; $("qdDone").hidden = true; }
+  function openQuoteForm() {
+    const q = quote();
+    showFormView();
+    $("qdNo").textContent = state.draft.quoteNo;
+    $("qdPrice").textContent = C.fmt(q.total);
+    $("qdError").hidden = true;
+    openDialog(quoteDialog);
+    $("qName").focus();
+  }
+  $("qdCancel").addEventListener("click", () => quoteDialog.close());
+
+  const V = {
+    name:  { input: "qName",  err: "qNameErr",  test: v => v.trim().length >= 2, msg: "Enter your full name." },
+    phone: { input: "qPhone", err: "qPhoneErr", test: v => /^[+\d\s\-()]+$/.test(v.trim()) && v.replace(/\D/g, "").length >= 7,
+             msg: "Enter a phone number with at least 7 digits, for example +673 712 3456." },
+    email: { input: "qEmail", err: "qEmailErr", test: v => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v.trim()), msg: "Enter a valid email address, like name@example.com." }
+  };
+  Object.values(V).forEach(f => $(f.input).addEventListener("input", () => $(f.input).setAttribute("aria-invalid", "false")));
+
+  $("quoteForm").addEventListener("submit", async e => {
+    e.preventDefault();
+    let firstBad = null;
+    Object.values(V).forEach(f => {
+      const el = $(f.input), ok = f.test(el.value);
+      el.setAttribute("aria-invalid", ok ? "false" : "true");
+      $(f.err).textContent = ok ? "" : f.msg;
+      if (!ok && !firstBad) firstBad = el;
+    });
+    if (firstBad) { firstBad.focus(); return; }
+
+    const p = state.property, q = quote();
+    const record = {
+      quoteNo: state.draft.quoteNo,
+      submittedAt: new Date().toISOString(),
+      status: "New",
+      kind: "house",
+      customer: { name: $("qName").value.trim(), phone: $("qPhone").value.trim(), email: $("qEmail").value.trim() },
+      property: { id: p.id, ref: p.ref, title: p.title, loc: p.loc, design: p.design, beds: p.beds, baths: p.baths, area: p.area, listedPrice: p.price },
+      lines: q.lines,
+      upgradeTotal: q.upgradeTotal,
+      total: q.total,
+      aiVisited: !!state.draft.aiVisited
+    };
+    const sendBtn = document.querySelector('#quoteForm button[type="submit"], button[type="submit"][form="quoteForm"]');
+    if (sendBtn.disabled) return;
+    const sendLabel = sendBtn.textContent;
+    sendBtn.disabled = true; sendBtn.textContent = "Sending\u2026";
+    const saved = await S.addQuote(record);
+    sendBtn.disabled = false; sendBtn.textContent = sendLabel;
+    if (!saved) {
+      const err = $("qdError");
+      err.textContent = "We couldn't send your request. Please check your internet connection and try again.";
+      err.hidden = false;
+      return;
+    }
+    S.clearDraft(p.id);
+    state.submitted = record;
+    $("qdDoneName").textContent = record.customer.name;
+    $("qdForm").hidden = true; $("qdDone").hidden = false;
+    $("qdDoneTitle").focus();
+  });
+
+  $("qdDoneBtn").addEventListener("click", () => quoteDialog.close());
+  quoteDialog.addEventListener("close", () => {
+    if (!state.submitted) return;
+    state.submitted = null;
+    $("quoteForm").reset();
+    Object.values(V).forEach(f => $(f.input).setAttribute("aria-invalid", "false"));
+    loadProperty(state.property.id);
+    renderAll();
+    $("summary").scrollIntoView({ block: "start" });
+  });
+
+  $("propSelect").innerHTML = `<option value="">Select a property…</option>` +
+    houses.map(h => `<option value="${h.id}">${esc(where(h).replace(" in ", ", "))}</option>`).join("");
+
+  const params = new URLSearchParams(window.location.search);
+  const wanted = params.get("property");
+  const initial = houses.some(h => h.id === wanted) ? wanted
+                : houses.some(h => h.id === S.getLastProperty()) ? S.getLastProperty() : "";
+  loadProperty(initial);
+  syncUrl();
+  renderAll();
+  if (window.location.hash === "#summary") $("summary").scrollIntoView();
+})();
+});
+</script>
+<script src="Js/Auth.js"></script>
+</body>
+</html>

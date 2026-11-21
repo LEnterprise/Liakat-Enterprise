@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Project Updates — Liakat Enterprise</title>
+<link rel="stylesheet" href="Css/Style.css">
+<script src="Js/Config.js"></script>
+<script src="Js/Db.js"></script>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container">
+    <a href="index.html" class="brand">
+      <span class="brand-mark">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M9 21v-6h6v6"/></svg>
+      </span>
+      <span class="brand-text">
+        <div class="name">Liakat Enterprise</div>
+      </span>
+    </a>
+    <nav class="main-nav">
+      <a href="index.html">Home</a>
+      <a href="PropertyListings.html">Property Listings</a>
+      <a href="MaterialOptions.html">Material Options</a>
+      <a href="AiVisualization.html">AI Visualization</a>
+      <a href="GeoportalMapping.html">Geoportal Mapping</a>
+      <div class="nav-more">
+        <a href="#" class="nav-more-trigger">More
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+        </a>
+        <div class="nav-more-panel">
+          <a href="ProjectUpdates.html" class="active">Project Updates</a>
+          <a href="PaymentTracking.html">Payment Tracking</a>
+          <a href="VariationOrders.html">Variation Orders</a>
+        </div>
+      </div>
+    </nav>
+    <div class="header-actions">
+      <a href="#" class="avatar-btn" aria-label="Account">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+      </a>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+  <div class="page-header">
+    <h1>Project Updates</h1>
+  </div>
+
+  <select id="projectFilter" style="padding:10px 14px; border:1px solid var(--border); border-radius:8px; background:var(--surface); margin-bottom:20px;">
+    <option value="">All Projects</option>
+  </select>
+</div>
+
+<section style="padding-bottom:56px;">
+  <div class="container">
+    <div class="update-list" id="updatesList"></div>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="brand">
+      <span class="brand-mark" style="width:30px;height:30px;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" width="16" height="16"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg>
+      </span>
+      <span class="brand-text">
+        <div class="name">Liakat Enterprise</div>
+      </span>
+    </div>
+    <div class="footer-links">
+      <span>📍 Brunei Darussalam</span>
+    </div>
+  </div>
+</footer>
+
+<script src="Js/Properties.js"></script>
+<script src="Js/Listings.js"></script>
+<script src="Js/Updates.js"></script>
+<script>
+LEDb.ready.then(function () {
+(function () {
+  "use strict";
+  const U = window.LEUpdates;
+  const $ = id => document.getElementById(id);
+  const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, ch => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch]));
+  const fmtDate = iso => new Date(iso).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
+  const HOUSE_ICON = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M9 21v-6h6v6"/></svg>';
+  const LAND_ICON  = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 12h18M6 12V5h12v7M4 12v9h16v-9"/></svg>';
+
+  const updates = U.getAll().filter(u => properties.some(p => p.id === u.propertyId));
+
+  const projectIds = [...new Set(updates.map(u => u.propertyId))];
+  const projects = projectIds.map(id => properties.find(p => p.id === id)).filter(Boolean)
+    .sort((a, b) => a.title.localeCompare(b.title));
+  $("projectFilter").innerHTML = `<option value="">All Projects</option>` +
+    projects.map(p => `<option value="${esc(p.id)}">${esc(p.title)}</option>`).join("");
+
+  const params = new URLSearchParams(window.location.search);
+  if (projectIds.includes(params.get("property"))) $("projectFilter").value = params.get("property");
+
+  function render() {
+    const want = $("projectFilter").value;
+    const list = want ? updates.filter(u => u.propertyId === want) : updates;
+    $("updatesList").innerHTML = list.map(u => {
+      const p = properties.find(x => x.id === u.propertyId);
+      const thumb = p.thumb ? `<img src="${esc(p.thumb)}" alt="">` : (p.icon === "land" ? LAND_ICON : HOUSE_ICON);
+      return `
+      <article class="update-card">
+        <div class="update-thumb" style="display:flex; align-items:center; justify-content:center; color:var(--text-faint); overflow:hidden;">${thumb}</div>
+        <div class="update-main">
+          <div class="update-top">
+            <div class="title">${esc(p.title)}</div>
+            <div class="update-date">${esc(fmtDate(u.createdAt))}</div>
+          </div>
+          <div class="update-sub">${esc(p.loc)} · ${esc(u.area)}</div>
+          <p class="update-desc">${esc(u.desc)}</p>
+          <div class="update-bottom">
+            <span class="pill ${U.PILL[u.status] || "pill-navy"}">${esc(u.status)}</span>
+            <a href="PropertyListings.html?property=${encodeURIComponent(p.id)}" class="btn-text">View property →</a>
+          </div>
+        </div>
+      </article>`;
+    }).join("") || `<div class="qr-empty"><strong>${updates.length ? "No updates for this project yet" : "No updates yet"}</strong>${updates.length ? "Try choosing a different project." : "Check back soon — our team posts progress here as work happens."}</div>`;
+  }
+  $("projectFilter").addEventListener("change", render);
+  render();
+})();
+});
+</script>
+<script src="Js/Auth.js"></script>
+</body>
+</html>

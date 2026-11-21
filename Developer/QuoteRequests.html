@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quote Requests — Liakat Enterprise</title>
+<link rel="stylesheet" href="../Css/Style.css">
+<script src="../Js/Config.js"></script>
+<script src="../Js/Db.js"></script>
+<script src="../Js/Auth.js"></script>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container">
+    <a href="ManageUpdates.html" class="brand">
+      <span class="brand-mark">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M9 21v-6h6v6"/></svg>
+      </span>
+      <span class="brand-text">
+        <div class="name">Liakat Enterprise</div>
+      </span>
+    </a>
+    <div class="header-actions">
+      <span class="portal-badge dev">Admin Portal</span>
+      <a href="../index.html" class="btn-text" style="font-size:13px;">Back to client site</a>
+      <a href="#" class="avatar-btn" aria-label="Account">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+      </a>
+    </div>
+  </div>
+</header>
+
+<div class="dev-layout">
+  <aside class="dev-sidebar">
+    <a href="ManageUpdates.html">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+      Project Updates
+    </a>
+    <a href="Approvals.html">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9"/></svg>
+      Approvals
+    </a>
+    <a href="Payments.html">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20M6 15h4"/></svg>
+      Payments <span class="nav-badge" data-pay-badge hidden></span>
+    </a>
+      <a href="QuoteRequests.html" class="active">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8Z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></svg>
+      Quote Requests <span class="nav-badge" data-quote-badge hidden></span>
+    </a>
+      <a href="Listings.html">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M12 12v5M9.5 14.5h5"/></svg>
+      Listings
+    </a>
+  </aside>
+
+    <main class="dev-main">
+    <div class="page-header" style="padding-top:0;">
+      <h1>Quote Requests</h1>
+    </div>
+
+    <div class="qr-toolbar">
+      <div class="chip-row" id="qrFilters"></div>
+    </div>
+
+    <div class="card">
+      <table class="data-table qr-table">
+        <thead>
+          <tr><th>Quote number</th><th>Client</th><th>Property</th><th>Quote total</th><th>Submitted</th><th>Status</th><th></th></tr>
+        </thead>
+        <tbody id="qrRows"></tbody>
+      </table>
+      <div class="qr-empty" id="qrEmpty" hidden></div>
+    </div>
+
+  </main>
+</div>
+
+<dialog class="dlg wide" id="qrDialog" aria-labelledby="qrTitle">
+  <button type="button" class="dlg-close" id="qrClose" aria-label="Close quote request">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
+  </button>
+  <div class="dlg-body" id="qrBody"></div>
+  <div class="dlg-foot" style="justify-content:space-between; align-items:center;">
+    <button type="button" class="btn-danger-text" id="qrDelete">Delete request</button>
+    <div class="qr-status">
+      <label for="qrStatus" style="font-size:13px; font-weight:600; color:var(--text-muted);">Status</label>
+      <select id="qrStatus"></select>
+    </div>
+  </div>
+</dialog>
+
+<script src="../Js/Store.js"></script>
+<script src="../Js/DevBadge.js"></script>
+<script>
+LEDb.ready.then(function () {
+(function () {
+  "use strict";
+  const S = window.LEStore;
+  const $ = id => document.getElementById(id);
+  const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, ch => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[ch]));
+  const fmt = n => "B$ " + Math.round(n).toLocaleString("en-US");
+  const fmtDelta = n => n === 0 ? "Included" : (n > 0 ? "+ " : "− ") + fmt(Math.abs(n));
+  const when = iso => new Date(iso).toLocaleString("en-GB", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
+  const STATUSES = ["New", "Contacted", "Accepted", "Declined"];
+  const PILL = { New: "pill-blue", Contacted: "pill-amber", Accepted: "pill-green", Declined: "pill-red" };
+  const pill = s => `<span class="pill ${PILL[s] || "pill-navy"}">${esc(s)}</span>`;
+  const qty = (n, unit) => n.toLocaleString("en-US") + " " + ({ sqft: "sqft", door: n === 1 ? "door" : "doors", set: n === 1 ? "set" : "sets" }[unit] || unit);
+
+  let filter = "All";
+  let openNo = null;
+
+  function renderFilters(all) {
+    $("qrFilters").innerHTML = ["All", ...STATUSES].map(s => {
+      const n = s === "All" ? all.length : all.filter(q => q.status === s).length;
+      return `<button type="button" class="chip ${filter === s ? "active" : ""}" data-filter="${s}" aria-pressed="${filter === s}">${s} (${n})</button>`;
+    }).join("");
+  }
+
+  function renderRows(all) {
+    const list = filter === "All" ? all : all.filter(q => q.status === filter);
+    $("qrRows").innerHTML = list.map(q => `
+      <tr data-no="${esc(q.quoteNo)}">
+        <td class="vo-id">${esc(q.quoteNo)}</td>
+        <td>${esc(q.customer.name)}<span class="sub">${esc(q.customer.phone)}</span></td>
+        <td>${esc(q.property.title)}<span class="sub">${esc(q.property.loc)}</span></td>
+        <td><strong>${fmt(q.total)}</strong>${q.kind === "land" ? `<span class="sub">Land, listed price</span>` : q.upgradeTotal ? `<span class="sub">${fmtDelta(q.upgradeTotal)} upgrades</span>` : `<span class="sub">Standard finishes</span>`}</td>
+        <td>${esc(when(q.submittedAt))}</td>
+        <td>${pill(q.status)}</td>
+        <td><button type="button" class="btn btn-sm btn-outline" data-view="${esc(q.quoteNo)}">View</button></td>
+      </tr>`).join("");
+
+    const empty = $("qrEmpty");
+    if (list.length === 0) {
+      empty.hidden = false;
+      empty.innerHTML = all.length === 0
+        ? `<strong>No quote requests yet</strong>When a client submits a quote from Material Options, it appears here.`
+        : `<strong>No ${esc(filter.toLowerCase())} requests</strong>Choose another filter to see the rest.`;
+    } else empty.hidden = true;
+    document.querySelector(".qr-table").hidden = list.length === 0;
+  }
+
+  function render() {
+    const all = S.getQuotes();
+    renderFilters(all); renderRows(all);
+  }
+
+  function renderDetail(q) {
+    const p = q.property, c = q.customer, isLand = q.kind === "land";
+    const tel = String(c.phone).replace(/[^\d+]/g, "");
+    $("qrBody").innerHTML = `
+      <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:16px; flex-wrap:wrap; padding-right:44px;">
+        <h2 id="qrTitle" style="display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin:0;">
+          <span class="vo-id" style="font-size:20px;">${esc(q.quoteNo)}</span><span id="qrPill">${pill(q.status)}</span>
+        </h2>
+        <div style="text-align:right;">
+          <span style="display:block; font-size:12px; color:var(--text-faint); font-weight:600;">Quote total</span>
+          <span style="font-family:'Plus Jakarta Sans','Inter',sans-serif; font-size:22px; font-weight:800; color:var(--navy);">${fmt(q.total)}</span>
+        </div>
+      </div>
+      <p style="font-size:13px; margin-top:6px;">Submitted ${esc(when(q.submittedAt))}. ${isLand ? "This is a land enquiry, so no materials were chosen." : q.aiVisited ? "The client previewed their choices in AI Visualization." : "The client did not preview in AI Visualization."}</p>
+
+      <div class="qr-detail-grid">
+        <div class="card">
+          <h3>Client</h3>
+          <div class="spec-row"><span>Name</span><span>${esc(c.name)}</span></div>
+          <div class="spec-row"><span>Phone</span><span><a href="tel:${esc(tel)}">${esc(c.phone)}</a></span></div>
+          <div class="spec-row" style="border-bottom:none;"><span>Email</span><span><a href="mailto:${esc(c.email)}">${esc(c.email)}</a></span></div>
+        </div>
+        <div class="card">
+          <h3>Property</h3>
+          <div class="spec-row"><span>${isLand ? "Plot" : "Home"}</span><span>${esc(p.title)}</span></div>
+          <div class="spec-row"><span>Location</span><span>${esc(p.loc)}</span></div>
+          ${isLand
+            ? `<div class="spec-row"><span>Type</span><span>Land</span></div>
+               <div class="spec-row" style="border-bottom:none;"><span>Land area</span><span>${esc(p.area)}</span></div>`
+            : `<div class="spec-row"><span>Design</span><span>${esc(p.design || "—")}</span></div>
+               <div class="spec-row" style="border-bottom:none;"><span>Size</span><span>${esc(p.beds)} bed, ${esc(p.baths)} bath, ${esc(p.area)}</span></div>`}
+        </div>
+      </div>
+
+      ${isLand ? `<div class="card card-pad" style="font-size:13.5px; color:var(--text-muted);">No materials on a land enquiry. The quote total is the listed price of the plot.</div>` : `
+      <div class="qr-lines">
+        <table class="data-table">
+          <thead><tr><th>Item</th><th>Client's choice</th><th>Est. quantity</th><th>Cost vs standard</th></tr></thead>
+          <tbody>
+            ${q.lines.map(l => `
+              <tr>
+                <td><strong>${esc(l.label)}</strong><span class="sub" style="display:block; font-size:12px; color:var(--text-faint);">${esc(l.where)}</span></td>
+                <td><span style="display:inline-block; width:12px; height:12px; border-radius:3px; margin-right:7px; vertical-align:-1px; border:1px solid rgba(14,42,71,.2); background:${l.imgSm ? `url('../${esc(l.imgSm)}') center/cover` : esc(l.color)};"></span>${esc(l.name)} <span style="color:var(--text-faint); font-size:12px;">${esc(l.code)}${l.isUpgrade ? "" : ", standard"}</span></td>
+                <td>${esc(qty(l.qty, l.unit))}</td>
+                <td class="${l.upgradeCost > 0 ? "up" : ""}">${fmtDelta(l.upgradeCost)}</td>
+              </tr>`).join("")}
+          </tbody>
+        </table>
+      </div>`}
+
+      <div class="qs-totals qr-totals">
+        <div class="tr"><span>Listed price</span><b>${fmt(p.listedPrice)}</b></div>
+        ${isLand ? "" : `<div class="tr"><span>Material upgrades</span><b>${q.upgradeTotal ? fmtDelta(q.upgradeTotal) : "None"}</b></div>`}
+        <div class="tr grand"><span>Quote total</span><b>${fmt(q.total)}</b></div>
+      </div>
+      ${isLand ? `<p style="font-size:12.5px; color:var(--text-faint); margin:12px 0 10px;">Confirm availability and the final price with the client.</p>` : `<p style="font-size:12.5px; color:var(--text-faint); margin:12px 0 10px;">Quantities are estimates from the size of the home. Confirm final quantities with the client.</p>`}`;
+
+    $("qrStatus").innerHTML = STATUSES.map(s => `<option ${s === q.status ? "selected" : ""}>${s}</option>`).join("");
+  }
+
+  function lockScroll() {
+    const de = document.documentElement, sw = window.innerWidth - de.clientWidth;
+    if (sw > 0) de.style.paddingRight = sw + "px";
+    de.classList.add("pd-lock");
+  }
+  function openDetail(no) {
+    const q = S.getQuotes().find(x => x.quoteNo === no);
+    if (!q) return;
+    openNo = no;
+    renderDetail(q);
+    $("qrBody").scrollTop = 0;
+    lockScroll();
+    $("qrDialog").showModal();
+  }
+  $("qrDialog").addEventListener("close", () => {
+    openNo = null;
+    document.documentElement.classList.remove("pd-lock");
+    document.documentElement.style.paddingRight = "";
+  });
+  $("qrDialog").addEventListener("click", e => { if (e.target === $("qrDialog")) $("qrDialog").close(); });
+  $("qrClose").addEventListener("click", () => $("qrDialog").close());
+
+  $("qrStatus").addEventListener("change", e => {
+    if (!openNo) return;
+    S.updateQuote(openNo, { status: e.target.value });
+    $("qrPill").innerHTML = pill(e.target.value);
+    render();
+  });
+  $("qrDelete").addEventListener("click", () => {
+    if (!openNo) return;
+    if (!confirm("Delete quote request " + openNo + "? This can't be undone.")) return;
+    S.deleteQuote(openNo);
+    $("qrDialog").close();
+    render();
+  });
+
+  $("qrRows").addEventListener("click", e => {
+    const tr = e.target.closest("tr[data-no]");
+    if (tr) openDetail(tr.dataset.no);
+  });
+  $("qrFilters").addEventListener("click", e => {
+    const b = e.target.closest("[data-filter]");
+    if (b) { filter = b.dataset.filter; render(); }
+  });
+
+  S.onChange(render);
+  render();
+})();
+});
+</script>
+</body>
+</html>

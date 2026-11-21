@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Payment Tracking — Liakat Enterprise</title>
+<link rel="stylesheet" href="Css/Style.css">
+<script src="Js/Config.js"></script>
+<script src="Js/Db.js"></script>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container">
+    <a href="index.html" class="brand">
+      <span class="brand-mark">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M9 21v-6h6v6"/></svg>
+      </span>
+      <span class="brand-text">
+        <div class="name">Liakat Enterprise</div>
+      </span>
+    </a>
+    <nav class="main-nav">
+      <a href="index.html">Home</a>
+      <a href="PropertyListings.html">Property Listings</a>
+      <a href="MaterialOptions.html">Material Options</a>
+      <a href="AiVisualization.html">AI Visualization</a>
+      <a href="GeoportalMapping.html">Geoportal Mapping</a>
+      <div class="nav-more">
+        <a href="#" class="nav-more-trigger">More
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+        </a>
+        <div class="nav-more-panel">
+          <a href="ProjectUpdates.html">Project Updates</a>
+          <a href="PaymentTracking.html" class="active">Payment Tracking</a>
+          <a href="VariationOrders.html">Variation Orders</a>
+        </div>
+      </div>
+    </nav>
+    <div class="header-actions">
+      <a href="#" class="avatar-btn" aria-label="Account">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+      </a>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+  <div class="page-header page-header-row">
+    <div>
+      <h1>Payment Tracking</h1>
+    </div>
+    <div class="field" id="ptPlanWrap" style="margin:0; min-width:260px;" hidden>
+      <label for="ptPlan">Property</label>
+      <select id="ptPlan"></select>
+    </div>
+  </div>
+</div>
+
+<section style="padding-bottom:56px;">
+  <div class="container">
+
+    <div class="card card-pad" id="ptLookup" hidden style="max-width:560px; margin-bottom:20px;">
+      <h3 style="font-size:15px; margin-bottom:4px;">Open your payment schedule</h3>
+      <p style="font-size:13px; margin-bottom:12px;">Enter the plan number and access code Liakat Enterprise gave you.</p>
+      <div class="form-error" id="lkError" role="alert" hidden style="margin-bottom:12px;"></div>
+      <form id="lkForm" novalidate>
+        <div class="form-grid">
+          <div class="field">
+            <label for="lkId">Plan number</label>
+            <input id="lkId" type="text" placeholder="PP-001" autocomplete="off" autocapitalize="characters" spellcheck="false">
+          </div>
+          <div class="field">
+            <label for="lkCode">Access code</label>
+            <input id="lkCode" type="text" placeholder="ABCD-EFGH" autocomplete="off" autocapitalize="characters" spellcheck="false">
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary" id="lkBtn">Open schedule</button>
+      </form>
+    </div>
+
+    <div class="card" id="ptEmpty" hidden>
+      <div class="qr-empty">
+        <strong>No payment schedule yet</strong>
+        Once Liakat Enterprise sets up the payment schedule for your property, it will appear here.
+      </div>
+    </div>
+
+    <div id="ptContent" hidden>
+      <div class="stat-row" style="margin-bottom:20px;">
+        <div class="stat-card">
+          <div class="label">Total Contract Amount</div>
+          <div class="value" id="ptTotal"></div>
+        </div>
+        <div class="stat-card">
+          <div class="label">Total Paid</div>
+          <div class="value" id="ptPaid"></div>
+        </div>
+        <div class="stat-card accent">
+          <div class="label">Remaining Balance</div>
+          <div class="value" id="ptRemaining"></div>
+        </div>
+      </div>
+
+      <div class="material-layout" style="grid-template-columns: 1fr 300px;">
+        <div class="card card-pad" style="overflow-x:auto;">
+          <h3 style="font-size:15px; margin-bottom:14px;">Payment Schedule</h3>
+          <table class="data-table qr-table">
+            <thead>
+              <tr><th>Due date</th><th>Description</th><th>Amount (B$)</th><th>Status</th><th></th></tr>
+            </thead>
+            <tbody id="ptRows"></tbody>
+          </table>
+        </div>
+
+        <aside class="card card-pad">
+          <h3 style="font-size:14px; margin-bottom:6px;">Payment Summary</h3>
+          <div class="progress-track"><div class="progress-fill" id="ptBar" style="width:0%;"></div></div>
+          <div class="progress-label" id="ptPct"></div>
+
+          <div id="ptNext" style="margin-top:16px;"></div>
+
+          <button type="button" class="btn btn-primary btn-block" id="ptHistoryBtn" style="margin-top:18px;">View Payment History</button>
+
+          <h3 style="font-size:14px; margin:22px 0 4px;">Payment Methods</h3>
+          <div class="method-row">
+            <span class="method-icon">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 10h18M5 10V7l7-4 7 4v3M5 10v9h14v-9"/></svg>
+            </span>
+            Bank Transfer
+          </div>
+          <div class="method-row">
+            <span class="method-icon">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18M7 15h4"/></svg>
+            </span>
+            Cashier's Cheque
+          </div>
+          <div class="method-row">
+            <span class="method-icon">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M8 12h8M12 8v8"/></svg>
+            </span>
+            Online Banking
+          </div>
+        </aside>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<dialog class="dlg" id="ptReport" aria-labelledby="prTitle">
+  <button type="button" class="dlg-close" id="prClose" aria-label="Close">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
+  </button>
+  <form id="prForm" novalidate style="display:flex; flex-direction:column; min-height:0; flex:1 1 auto;">
+    <div class="dlg-body">
+      <h2 id="prTitle" style="padding-right:44px;">Report a payment</h2>
+      <p id="prSummary"></p>
+      <div class="form-error" id="prError" role="alert" hidden style="margin-top:14px;"></div>
+      <div class="form-grid" style="margin-top:16px;">
+        <div class="field full">
+          <label for="prMethod">How did you pay?</label>
+          <select id="prMethod" aria-describedby="prMethodErr"></select>
+          <div class="err" id="prMethodErr"></div>
+        </div>
+        <div class="field">
+          <label for="prDate">Date paid</label>
+          <input id="prDate" type="date" aria-describedby="prDateErr">
+          <div class="err" id="prDateErr"></div>
+        </div>
+        <div class="field">
+          <label for="prRef">Reference / cheque number</label>
+          <input id="prRef" type="text" maxlength="60" aria-describedby="prRefErr">
+          <div class="err" id="prRefErr"></div>
+        </div>
+      </div>
+      <p style="font-size:12.5px; color:var(--text-faint);">We will check this against our records and confirm it here.</p>
+    </div>
+    <div class="dlg-foot">
+      <button type="button" class="btn btn-outline" id="prCancel">Cancel</button>
+      <button type="submit" class="btn btn-primary">Send payment details</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog class="dlg wide" id="ptHistory" aria-labelledby="phTitle">
+  <button type="button" class="dlg-close" id="phClose" aria-label="Close">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
+  </button>
+  <div class="dlg-body" id="phBody"></div>
+  <div class="dlg-foot">
+    <button type="button" class="btn btn-primary" id="phDone">Done</button>
+  </div>
+</dialog>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="brand">
+      <span class="brand-mark" style="width:30px;height:30px;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" width="16" height="16"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg>
+      </span>
+      <span class="brand-text">
+        <div class="name">Liakat Enterprise</div>
+      </span>
+    </div>
+    <div class="footer-links">
+      <span>📍 Brunei Darussalam</span>
+    </div>
+  </div>
+</footer>
+
+<script src="Js/Properties.js"></script>
+<script src="Js/Listings.js"></script>
+<script src="Js/Payments.js"></script>
+<script>
+LEDb.ready.then(function () {
+(function () {
+  "use strict";
+  const P = window.LEPayments;
+  const $ = id => document.getElementById(id);
+  const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, ch => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[ch]));
+  const money = n => "B$ " + Math.round(n).toLocaleString("en-US");
+  const num = n => Math.round(n).toLocaleString("en-US");
+  const fmtDate = d => d ? new Date(d + "T00:00:00").toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : "—";
+  const pill = s => `<span class="pill ${P.PILL[s] || "pill-navy"}">${esc(s)}</span>`;
+
+  const needsCode = LEDb.configured && !LEDb.isAdmin();
+  let planId = null;
+  let reportItemId = null;
+
+  const currentPlan = () => P.getAll().find(p => p.id === planId) || null;
+
+  function lockScroll() {
+    const de = document.documentElement;
+    if (de.classList.contains("pd-lock")) return;
+    const sw = window.innerWidth - de.clientWidth;
+    if (sw > 0) de.style.paddingRight = sw + "px";
+    de.classList.add("pd-lock");
+  }
+  function unlockScroll() {
+    if (document.querySelector("dialog[open]")) return;
+    document.documentElement.classList.remove("pd-lock");
+    document.documentElement.style.paddingRight = "";
+  }
+  function openDlg(d) { lockScroll(); if (!d.open) d.showModal(); }
+
+  function render() {
+    const plans = P.getAll();
+    if (!plans.some(p => p.id === planId)) planId = plans.length ? plans[0].id : null;
+
+    $("ptLookup").hidden = !needsCode;
+    if (needsCode) $("ptEmpty").innerHTML = `<div class="qr-empty"><strong>No payment schedule opened yet</strong>Enter your plan number and access code above to see your payment schedule.</div>`;
+    $("ptEmpty").hidden = plans.length > 0;
+    $("ptContent").hidden = plans.length === 0;
+    $("ptPlanWrap").hidden = plans.length < 2;
+    if (!plans.length) return;
+
+    $("ptPlan").innerHTML = plans.map(p =>
+      `<option value="${esc(p.id)}" ${p.id === planId ? "selected" : ""}>${esc(p.property.title)} (${esc(p.id)})</option>`).join("");
+
+    const plan = currentPlan(), t = P.totals(plan);
+    $("ptTotal").textContent = money(t.total);
+    $("ptPaid").textContent = money(t.paid);
+    $("ptRemaining").textContent = money(t.remaining);
+    $("ptBar").style.width = t.pct + "%";
+    $("ptPct").textContent = t.pct + "% Paid";
+
+    const items = plan.items.slice().sort((a, b) => String(a.dueDate).localeCompare(String(b.dueDate)));
+    $("ptRows").innerHTML = items.map(i => {
+      const st = P.displayStatus(i);
+      const canReport = i.status === "Pending";
+      return `<tr>
+        <td>${esc(fmtDate(i.dueDate))}</td>
+        <td>${esc(i.description)}${i.status === "Paid" && i.paidDate ? `<span class="sub">Paid ${esc(fmtDate(i.paidDate))}${i.method ? " by " + esc(i.method) : ""}</span>` : ""}${i.status === "Reported" ? `<span class="sub">You reported this on ${esc(fmtDate(i.paidDate))}</span>` : ""}</td>
+        <td>${num(i.amount)}</td>
+        <td>${pill(st)}</td>
+        <td>${canReport ? `<button type="button" class="btn btn-sm btn-outline" data-report="${esc(i.id)}">I've paid</button>` : ""}</td>
+      </tr>`;
+    }).join("");
+
+    const n = t.next;
+    if (t.complete) {
+      $("ptNext").innerHTML = `<div class="spec-row" style="border-bottom:none;"><span>Status</span><span style="color:var(--green);">Fully paid</span></div>`;
+    } else if (n) {
+      const overdue = P.displayStatus(n) === "Overdue";
+      $("ptNext").innerHTML = `
+        <div class="spec-row"><span>${overdue ? "Overdue payment" : "Next payment"}</span><span style="${overdue ? "color:var(--red);" : ""}">${money(n.amount)}</span></div>
+        <div class="spec-row" style="border-bottom:none;"><span>${overdue ? "Was due" : "Due"}</span><span style="${overdue ? "color:var(--red);" : ""}">${esc(fmtDate(n.dueDate))}</span></div>`;
+    } else {
+      $("ptNext").innerHTML = `<div class="spec-row" style="border-bottom:none;"><span>Status</span><span>Awaiting confirmation</span></div>`;
+    }
+  }
+
+  function setErr(id, msg) { $(id).setAttribute("aria-invalid", "true"); $(id + "Err").textContent = msg; }
+  function clearErrs() {
+    ["prMethod", "prDate", "prRef"].forEach(id => { $(id).setAttribute("aria-invalid", "false"); $(id + "Err").textContent = ""; });
+    $("prError").hidden = true;
+  }
+  function openReport(itemId) {
+    const plan = currentPlan(); if (!plan) return;
+    const item = plan.items.find(i => i.id === itemId); if (!item) return;
+    reportItemId = itemId;
+    clearErrs();
+    $("prSummary").innerHTML = `${esc(item.description)}, <strong>${money(item.amount)}</strong>, due ${esc(fmtDate(item.dueDate))}.`;
+    $("prMethod").innerHTML = `<option value="">Choose a payment method</option>` + P.METHODS.map(m => `<option>${esc(m)}</option>`).join("");
+    $("prDate").max = P.today();
+    $("prDate").value = P.today();
+    $("prRef").value = "";
+    openDlg($("ptReport"));
+    $("prMethod").focus();
+  }
+  $("prForm").addEventListener("submit", async e => {
+    e.preventDefault();
+    clearErrs();
+    const method = $("prMethod").value, date = $("prDate").value, ref = $("prRef").value.replace(/\s+/g, " ").trim();
+    let first = null;
+    const bad = (id, m) => { setErr(id, m); if (!first) first = id; };
+    if (!method) bad("prMethod", "Choose how you paid.");
+    if (!date) bad("prDate", "Enter the date you paid.");
+    else if (date > P.today()) bad("prDate", "The date can't be in the future.");
+    if (!ref) bad("prRef", "Enter a reference or cheque number so we can match it.");
+    if (first) { $(first).focus(); return; }
+    const sendBtn = $("prForm").querySelector('button[type="submit"]');
+    if (sendBtn.disabled) return;
+    const sendLabel = sendBtn.textContent;
+    sendBtn.disabled = true; sendBtn.textContent = "Sending\u2026";
+    const ok = await P.updateItem(planId, reportItemId, { status: "Reported", method: method, paidDate: date, reference: ref, reportedAt: new Date().toISOString() });
+    sendBtn.disabled = false; sendBtn.textContent = sendLabel;
+    if (!ok) { $("prError").textContent = "We couldn't send this. Please check your internet connection and try again."; $("prError").hidden = false; return; }
+    $("ptReport").close();
+  });
+  ["prMethod", "prDate", "prRef"].forEach(id => {
+    const clear = () => { $(id).setAttribute("aria-invalid", "false"); $(id + "Err").textContent = ""; $("prError").hidden = true; };
+    $(id).addEventListener("input", clear); $(id).addEventListener("change", clear);
+  });
+  $("prCancel").addEventListener("click", () => $("ptReport").close());
+  $("prClose").addEventListener("click", () => $("ptReport").close());
+
+  function openHistory() {
+    const plan = currentPlan(); if (!plan) return;
+    const t = P.totals(plan);
+    const done = plan.items.filter(i => i.status === "Paid" || i.status === "Reported")
+      .sort((a, b) => String(b.paidDate).localeCompare(String(a.paidDate)));
+    $("phBody").innerHTML = `
+      <h2 id="phTitle" style="padding-right:44px;">Payment history</h2>
+      <p style="font-size:13px;">${esc(plan.property.title)}</p>
+      ${done.length === 0 ? `<div class="qr-empty"><strong>No payments yet</strong>Payments appear here once you have paid and we have recorded them.</div>` : `
+      <div class="card" style="margin-top:14px; overflow-x:auto;">
+        <table class="data-table qr-table">
+          <thead><tr><th>Date paid</th><th>Description</th><th>Method</th><th>Reference</th><th>Amount (B$)</th><th>Status</th></tr></thead>
+          <tbody>${done.map(i => `<tr>
+            <td>${esc(fmtDate(i.paidDate))}</td><td>${esc(i.description)}</td><td>${esc(i.method || "—")}</td><td>${esc(i.reference || "—")}</td>
+            <td>${num(i.amount)}</td><td>${pill(P.displayStatus(i))}</td></tr>`).join("")}</tbody>
+        </table>
+      </div>
+      <div class="spec-row" style="margin-top:8px;"><span>Total paid (confirmed)</span><span>${money(t.paid)}</span></div>`}`;
+    openDlg($("ptHistory"));
+    $("phDone").focus();
+  }
+  $("ptHistoryBtn").addEventListener("click", openHistory);
+  $("phDone").addEventListener("click", () => $("ptHistory").close());
+  $("phClose").addEventListener("click", () => $("ptHistory").close());
+
+  ["ptReport", "ptHistory"].forEach(id => {
+    const d = $(id);
+    d.addEventListener("close", unlockScroll);
+    d.addEventListener("click", e => { if (e.target === d) d.close(); });
+  });
+  $("lkForm").addEventListener("submit", async e => {
+    e.preventDefault();
+    const err = $("lkError"); err.hidden = true;
+    if (!$("lkId").value.trim() || !$("lkCode").value.trim()) { err.textContent = "Enter both the plan number and the access code."; err.hidden = false; return; }
+    const btn = $("lkBtn"); btn.disabled = true; btn.textContent = "Checking\u2026";
+    try {
+      const plan = await P.lookup($("lkId").value, $("lkCode").value);
+      if (!plan) { err.textContent = "We couldn't find a schedule with that plan number and code. Check them and try again."; err.hidden = false; }
+      else { planId = plan.id; $("lkCode").value = ""; render(); }
+    } catch (_) { err.textContent = "We couldn't check that right now. Please try again in a moment."; err.hidden = false; }
+    btn.disabled = false; btn.textContent = "Open schedule";
+  });
+  $("ptPlan").addEventListener("change", () => { planId = $("ptPlan").value; render(); });
+  $("ptRows").addEventListener("click", e => {
+    const b = e.target.closest("[data-report]");
+    if (b) openReport(b.dataset.report);
+  });
+  P.onChange(() => {
+    render();
+    if ($("ptHistory").open) openHistory();
+  });
+  render();
+})();
+});
+</script>
+<script src="Js/Auth.js"></script>
+</body>
+</html>

@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Payments — Liakat Enterprise</title>
+<link rel="stylesheet" href="../Css/Style.css">
+<script src="../Js/Config.js"></script>
+<script src="../Js/Db.js"></script>
+<script src="../Js/Auth.js"></script>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container">
+    <a href="ManageUpdates.html" class="brand">
+      <span class="brand-mark">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M9 21v-6h6v6"/></svg>
+      </span>
+      <span class="brand-text">
+        <div class="name">Liakat Enterprise</div>
+      </span>
+    </a>
+    <div class="header-actions">
+      <span class="portal-badge dev">Admin Portal</span>
+      <a href="../index.html" class="btn-text" style="font-size:13px;">Back to client site</a>
+      <a href="#" class="avatar-btn" aria-label="Account">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+      </a>
+    </div>
+  </div>
+</header>
+
+<div class="dev-layout">
+  <aside class="dev-sidebar">
+    <a href="ManageUpdates.html">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+      Project Updates
+    </a>
+    <a href="Approvals.html">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9"/></svg>
+      Approvals
+    </a>
+    <a href="Payments.html" class="active">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20M6 15h4"/></svg>
+      Payments <span class="nav-badge" data-pay-badge hidden></span>
+    </a>
+      <a href="QuoteRequests.html">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8Z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></svg>
+      Quote Requests <span class="nav-badge" data-quote-badge hidden></span>
+    </a>
+      <a href="Listings.html">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M12 12v5M9.5 14.5h5"/></svg>
+      Listings
+    </a>
+  </aside>
+
+  <main class="dev-main">
+    <div class="page-header page-header-row" style="padding-top:0;">
+      <div>
+        <h1>Payments</h1>
+      </div>
+      <button type="button" class="btn btn-primary" id="pmNew">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+        New payment plan
+      </button>
+    </div>
+
+    <div class="qr-toolbar">
+      <div class="chip-row" id="pmFilters"></div>
+    </div>
+
+    <div class="card" style="overflow-x:auto;">
+      <table class="data-table qr-table" id="pmTable">
+        <thead>
+          <tr><th>Plan</th><th>Client</th><th>Property</th><th>Contract</th><th>Paid</th><th>Next due</th><th>Status</th><th></th></tr>
+        </thead>
+        <tbody id="pmRows"></tbody>
+      </table>
+      <div class="qr-empty" id="pmEmpty" hidden></div>
+    </div>
+  </main>
+</div>
+
+<dialog class="dlg wide" id="pmForm" aria-labelledby="pfTitle">
+  <button type="button" class="dlg-close" id="pfClose" aria-label="Close">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
+  </button>
+  <form id="pfForm" novalidate style="display:flex; flex-direction:column; min-height:0; flex:1 1 auto;">
+    <div class="dlg-body">
+      <h2 id="pfTitle" style="padding-right:44px;">New payment plan</h2>
+      <p>Choose the property and client, then list each payment with its due date. The contract amount is the total of the payments.</p>
+      <div class="form-error" id="pfError" role="alert" hidden style="margin-top:14px;"></div>
+      <div class="form-grid" style="margin-top:18px;">
+        <div class="field full">
+          <label for="pfProperty">Property</label>
+          <select id="pfProperty" aria-describedby="pfPropertyErr"></select>
+          <div class="err" id="pfPropertyErr"></div>
+        </div>
+        <div class="field">
+          <label for="pfName">Client name</label>
+          <input id="pfName" type="text" autocomplete="off" aria-describedby="pfNameErr">
+          <div class="err" id="pfNameErr"></div>
+        </div>
+        <div class="field">
+          <label for="pfPhone">Client phone</label>
+          <input id="pfPhone" type="tel" autocomplete="off" aria-describedby="pfPhoneErr">
+          <div class="err" id="pfPhoneErr"></div>
+        </div>
+        <div class="field full">
+          <label for="pfEmail">Client email <span style="font-weight:400; color:var(--text-faint);">(optional)</span></label>
+          <input id="pfEmail" type="email" autocomplete="off" aria-describedby="pfEmailErr">
+          <div class="err" id="pfEmailErr"></div>
+        </div>
+      </div>
+
+      <h3 style="font-size:13px; margin:6px 0 8px;">Payment schedule</h3>
+      <div id="pfRows"></div>
+      <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; margin:4px 0 14px;">
+        <button type="button" class="btn btn-sm btn-outline" id="pfAdd">+ Add payment</button>
+        <div style="font-size:14px;">Contract total: <strong id="pfTotal">B$ 0</strong></div>
+      </div>
+    </div>
+    <div class="dlg-foot">
+      <button type="button" class="btn btn-outline" id="pfCancel">Cancel</button>
+      <button type="submit" class="btn btn-primary">Create plan</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog class="dlg wide" id="pmDetail" aria-labelledby="pdTitle">
+  <button type="button" class="dlg-close" id="pdClose" aria-label="Close">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
+  </button>
+  <div class="dlg-body" id="pdBody"></div>
+  <div class="dlg-foot" style="justify-content:space-between; align-items:center;">
+    <button type="button" class="btn-danger-text" id="pdDelete">Delete plan</button>
+    <button type="button" class="btn btn-primary" id="pdDone">Done</button>
+  </div>
+</dialog>
+
+<script src="../Js/Properties.js"></script>
+<script src="../Js/Listings.js"></script>
+<script src="../Js/Payments.js"></script>
+<script>
+LEDb.ready.then(function () {
+(function () {
+  "use strict";
+  const P = window.LEPayments;
+  const $ = id => document.getElementById(id);
+  const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, ch => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[ch]));
+  const money = n => "B$ " + Math.round(n).toLocaleString("en-US");
+  const num = n => Math.round(n).toLocaleString("en-US");
+  const fmtDate = d => d ? new Date(d + "T00:00:00").toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : "—";
+  const pill = s => `<span class="pill ${P.PILL[s] || "pill-navy"}">${esc(s)}</span>`;
+  const ordinal = n => { const s = ["th","st","nd","rd"], v = n % 100; return n + (s[(v - 20) % 10] || s[v] || s[0]); };
+
+  let filter = "All";
+  let openId = null;
+  let editingItem = null;
+
+  function lockScroll() {
+    const de = document.documentElement;
+    if (de.classList.contains("pd-lock")) return;
+    const sw = window.innerWidth - de.clientWidth;
+    if (sw > 0) de.style.paddingRight = sw + "px";
+    de.classList.add("pd-lock");
+  }
+  function unlockScroll() {
+    if (document.querySelector("dialog[open]")) return;
+    document.documentElement.classList.remove("pd-lock");
+    document.documentElement.style.paddingRight = "";
+  }
+
+  function planStatus(plan) {
+    const t = P.totals(plan);
+    if (t.reportedCount) return "Awaiting confirmation";
+    if (t.overdueCount) return "Overdue";
+    if (t.complete) return "Completed";
+    return "On track";
+  }
+  const PLAN_PILL = { "Awaiting confirmation": "pill-blue", "Overdue": "pill-red", "Completed": "pill-navy", "On track": "pill-green" };
+  const PLAN_STATUSES = ["Awaiting confirmation", "Overdue", "On track", "Completed"];
+  const planPill = s => `<span class="pill ${PLAN_PILL[s]}">${esc(s)}</span>`;
+
+  function renderFilters(all) {
+    $("pmFilters").innerHTML = ["All"].concat(PLAN_STATUSES).map(s => {
+      const n = s === "All" ? all.length : all.filter(p => planStatus(p) === s).length;
+      return `<button type="button" class="chip ${filter === s ? "active" : ""}" data-filter="${esc(s)}" aria-pressed="${filter === s}">${esc(s)} (${n})</button>`;
+    }).join("");
+  }
+  function renderRows(all) {
+    const list = filter === "All" ? all : all.filter(p => planStatus(p) === filter);
+    $("pmRows").innerHTML = list.map(p => {
+      const t = P.totals(p);
+      return `<tr data-id="${esc(p.id)}">
+        <td class="vo-id">${esc(p.id)}</td>
+        <td>${esc(p.client.name)}<span class="sub">${esc(p.client.phone)}</span></td>
+        <td>${esc(p.property.title)}</td>
+        <td>${money(t.total)}</td>
+        <td>${money(t.paid)}<span class="sub">${t.pct}%</span></td>
+        <td>${t.next ? money(t.next.amount) + `<span class="sub">${esc(fmtDate(t.next.dueDate))}</span>` : "—"}</td>
+        <td>${planPill(planStatus(p))}</td>
+        <td><button type="button" class="btn btn-sm ${t.reportedCount ? "btn-primary" : "btn-outline"}" data-open="${esc(p.id)}">${t.reportedCount ? "Confirm" : "Open"}</button></td>
+      </tr>`;
+    }).join("");
+    const empty = $("pmEmpty");
+    if (list.length === 0) {
+      empty.hidden = false;
+      empty.innerHTML = all.length === 0
+        ? `<strong>No payment plans yet</strong>Choose “New payment plan” to set up a client's payment schedule. It will show on their Payment Tracking page.`
+        : `<strong>No ${esc(filter.toLowerCase())} plans</strong>Choose another filter to see the rest.`;
+    } else empty.hidden = true;
+    $("pmTable").hidden = list.length === 0;
+  }
+  function updateBadge(all) {
+    const n = all.reduce((s, p) => s + P.totals(p).reportedCount, 0);
+    document.querySelectorAll("[data-pay-badge]").forEach(b => {
+      b.textContent = n; b.hidden = n === 0;
+      b.setAttribute("aria-label", n + " payment" + (n === 1 ? "" : "s") + " awaiting confirmation");
+    });
+  }
+  function render() {
+    const all = P.getAll();
+    renderFilters(all); renderRows(all); updateBadge(all);
+    if ($("pmDetail").open && openId && !editingItem) renderDetail();
+  }
+
+  function renderDetail() {
+    const plan = P.getAll().find(p => p.id === openId);
+    if (!plan) { $("pmDetail").close(); return; }
+    const t = P.totals(plan), c = plan.client;
+    const items = plan.items.slice().sort((a, b) => String(a.dueDate).localeCompare(String(b.dueDate)));
+    const rows = items.map(i => {
+      const st = P.displayStatus(i);
+      const editing = editingItem === i.id;
+      let actions = "";
+      if (i.status === "Pending") actions = `<button type="button" class="btn btn-sm btn-outline" data-record="${esc(i.id)}">Record payment</button>`;
+      else if (i.status === "Reported") actions = `<button type="button" class="btn btn-sm btn-primary" data-confirm="${esc(i.id)}">Confirm</button> <button type="button" class="btn btn-sm btn-outline" data-reject="${esc(i.id)}">Not received</button>`;
+      else actions = `<button type="button" class="btn-danger-text" data-undo="${esc(i.id)}">Undo</button>`;
+      const detail = (i.status === "Paid" || i.status === "Reported")
+        ? `<span class="sub">${i.status === "Reported" ? "Reported by client: " : "Paid "}${esc(fmtDate(i.paidDate))}${i.method ? ", " + esc(i.method) : ""}${i.reference ? ", ref " + esc(i.reference) : ""}</span>` : "";
+      const main = `<tr>
+        <td>${esc(fmtDate(i.dueDate))}</td>
+        <td>${esc(i.description)}${detail}</td>
+        <td>${num(i.amount)}</td>
+        <td>${pill(st)}</td>
+        <td style="white-space:nowrap;">${editing ? "" : actions}</td>
+      </tr>`;
+      const form = editing ? `<tr><td colspan="5" style="background:var(--bg);">
+        <div class="form-grid" style="grid-template-columns:1fr 1fr 1fr; align-items:end;">
+          <div class="field" style="margin:0;"><label for="rcMethod">Method</label>
+            <select id="rcMethod">${P.METHODS.map(m => `<option>${esc(m)}</option>`).join("")}</select></div>
+          <div class="field" style="margin:0;"><label for="rcDate">Date received</label>
+            <input id="rcDate" type="date" value="${esc(P.today())}"></div>
+          <div class="field" style="margin:0;"><label for="rcRef">Reference</label>
+            <input id="rcRef" type="text" maxlength="60"></div>
+        </div>
+        <div style="display:flex; gap:8px; justify-content:flex-end; margin-top:10px;">
+          <button type="button" class="btn btn-sm btn-outline" data-cancel-record>Cancel</button>
+          <button type="button" class="btn btn-sm btn-primary" data-save-record="${esc(i.id)}">Save as paid</button>
+        </div></td></tr>` : "";
+      return main + form;
+    }).join("");
+
+    $("pdBody").innerHTML = `
+      <h2 id="pdTitle" style="display:flex; align-items:center; gap:12px; flex-wrap:wrap; padding-right:44px;">
+        <span class="vo-id" style="font-size:20px;">${esc(plan.id)}</span>${planPill(planStatus(plan))}
+      </h2>
+      <p style="font-size:13px; margin-top:2px;">${esc(plan.property.title)}</p>
+      <div class="qr-detail-grid">
+        <div class="card">
+          <h3>Client</h3>
+          <div class="spec-row"><span>Name</span><span>${esc(c.name)}</span></div>
+          <div class="spec-row"><span>Phone</span><span><a href="tel:${esc(String(c.phone).replace(/[^\d+]/g, ""))}">${esc(c.phone)}</a></span></div>
+          <div class="spec-row" style="border-bottom:none;"><span>Email</span><span>${c.email ? `<a href="mailto:${esc(c.email)}">${esc(c.email)}</a>` : "—"}</span></div>
+        </div>
+        <div class="card">
+          <h3>Summary</h3>
+          <div class="spec-row"><span>Contract</span><span>${money(t.total)}</span></div>
+          <div class="spec-row"><span>Paid</span><span>${money(t.paid)} (${t.pct}%)</span></div>
+          <div class="spec-row"${LEDb.configured && plan.accessCode ? "" : ' style="border-bottom:none;"'}><span>Remaining</span><span>${money(t.remaining)}</span></div>
+          ${LEDb.configured && plan.accessCode ? `<div class="spec-row" style="border-bottom:none;"><span>Client access code</span><span style="font-family:ui-monospace,Menlo,Consolas,monospace; letter-spacing:.08em;">${esc(P.formatCode(plan.accessCode))}</span></div>` : ""}
+        </div>
+      </div>
+      <div class="form-error" id="pdError" role="alert" hidden></div>
+      <div class="card" style="overflow-x:auto;">
+        <table class="data-table qr-table">
+          <thead><tr><th>Due date</th><th>Description</th><th>Amount (B$)</th><th>Status</th><th></th></tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>`;
+  }
+  function openPlan(id) {
+    openId = id; editingItem = null;
+    renderDetail();
+    lockScroll();
+    if (!$("pmDetail").open) $("pmDetail").showModal();
+  }
+  function showErr(msg) { const e = $("pdError"); if (e) { e.textContent = msg; e.hidden = false; } }
+
+  $("pdBody").addEventListener("click", e => {
+    const t = e.target.closest("button"); if (!t) return;
+    if (t.dataset.record) { editingItem = t.dataset.record; renderDetail(); const m = $("rcMethod"); if (m) m.focus(); }
+    else if (t.hasAttribute("data-cancel-record")) { editingItem = null; renderDetail(); }
+    else if (t.dataset.saveRecord) {
+      const date = $("rcDate").value, ref = $("rcRef").value.replace(/\s+/g, " ").trim();
+      if (!date || date > P.today()) { showErr("Enter the date the payment was received (not in the future)."); return; }
+      const id = t.dataset.saveRecord; editingItem = null;
+      P.updateItem(openId, id, { status: "Paid", method: $("rcMethod").value, paidDate: date, reference: ref, confirmedAt: new Date().toISOString() });
+      renderDetail();
+    }
+    else if (t.dataset.confirm) { P.updateItem(openId, t.dataset.confirm, { status: "Paid", confirmedAt: new Date().toISOString() }); }
+    else if (t.dataset.reject) {
+      if (confirm("Mark this payment as not received? It goes back to Pending and the client will see it needs to be paid.")) {
+        P.updateItem(openId, t.dataset.reject, { status: "Pending", method: "", paidDate: "", reference: "", reportedAt: "" });
+      }
+    }
+    else if (t.dataset.undo) {
+      if (confirm("Mark this payment as unpaid again?")) {
+        P.updateItem(openId, t.dataset.undo, { status: "Pending", method: "", paidDate: "", reference: "", reportedAt: "", confirmedAt: "" });
+      }
+    }
+  });
+  $("pdDelete").addEventListener("click", () => {
+    if (openId && confirm("Delete this payment plan permanently? The client will no longer see it.")) { P.remove(openId); $("pmDetail").close(); }
+  });
+  $("pdDone").addEventListener("click", () => $("pmDetail").close());
+  $("pdClose").addEventListener("click", () => $("pmDetail").close());
+  $("pmDetail").addEventListener("close", () => { unlockScroll(); openId = null; editingItem = null; });
+  $("pmDetail").addEventListener("click", e => { if (e.target === $("pmDetail")) $("pmDetail").close(); });
+
+  const houses = () => (typeof properties !== "undefined" ? properties : []).filter(p => p.type === "For Sale");
+  const FIELDS = ["pfProperty", "pfName", "pfPhone", "pfEmail"];
+
+  function rowHtml(desc, date, amount) {
+    return `<div class="pf-row" style="display:grid; grid-template-columns:1.6fr 1fr 1fr auto; gap:8px; align-items:start; margin-bottom:8px;">
+      <input type="text" class="pf-desc" maxlength="60" placeholder="Description" value="${esc(desc)}" aria-label="Description">
+      <input type="date" class="pf-date" value="${esc(date)}" aria-label="Due date">
+      <input type="number" class="pf-amt" min="1" step="1" inputmode="numeric" placeholder="Amount (B$)" value="${esc(amount)}" aria-label="Amount in B$">
+      <button type="button" class="btn-danger-text pf-del" aria-label="Remove payment">Remove</button>
+    </div>`;
+  }
+  const rowInputStyle = `.pf-row input{ width:100%; padding:10px 12px; border:1px solid var(--border); border-radius:var(--radius-sm); background:var(--bg); font-family:inherit; font-size:14px; } .pf-row input[aria-invalid="true"]{ border-color:var(--red); background:#FFFCFC; } @media (max-width:640px){ .pf-row{ grid-template-columns:1fr 1fr !important; } .pf-row .pf-desc{ grid-column:1 / -1; } }`;
+  const st = document.createElement("style"); st.textContent = rowInputStyle; document.head.appendChild(st);
+
+  function addRow(desc, date, amount) {
+    $("pfRows").insertAdjacentHTML("beforeend", rowHtml(desc || "", date || "", amount || ""));
+  }
+  function nextDescription() {
+    const n = $("pfRows").children.length;
+    return n === 0 ? "Booking Fee" : ordinal(n) + " Instalment";
+  }
+  function updateTotal() {
+    let sum = 0;
+    document.querySelectorAll("#pfForm .pf-amt").forEach(i => { sum += Number(i.value) || 0; });
+    $("pfTotal").textContent = money(sum);
+  }
+  function setErr(id, msg) { $(id).setAttribute("aria-invalid", "true"); $(id + "Err").textContent = msg; }
+  function clearErrs() {
+    FIELDS.forEach(id => { $(id).setAttribute("aria-invalid", "false"); $(id + "Err").textContent = ""; });
+    document.querySelectorAll("#pfRows input").forEach(i => i.setAttribute("aria-invalid", "false"));
+    $("pfError").hidden = true;
+  }
+  function openForm() {
+    $("pfProperty").innerHTML = `<option value="">Choose a property</option>` +
+      houses().map(p => `<option value="${esc(p.id)}">${esc(p.title)} — ${esc(p.loc)}</option>`).join("");
+    FIELDS.forEach(id => { $(id).value = ""; });
+    $("pfRows").innerHTML = "";
+    addRow("Booking Fee"); addRow("1st Instalment");
+    clearErrs(); updateTotal();
+    lockScroll();
+    $("pmForm").showModal();
+    $("pfProperty").focus();
+  }
+  $("pmNew").addEventListener("click", openForm);
+  $("pfAdd").addEventListener("click", () => { addRow(nextDescription()); updateTotal(); const r = $("pfRows").lastElementChild; r.querySelector(".pf-date").focus(); });
+  $("pfRows").addEventListener("click", e => {
+    if (e.target.closest(".pf-del")) {
+      if ($("pfRows").children.length <= 1) return;
+      e.target.closest(".pf-row").remove(); updateTotal();
+    }
+  });
+  $("pfRows").addEventListener("input", () => { updateTotal(); $("pfError").hidden = true; });
+  FIELDS.forEach(id => $(id).addEventListener("input", () => { $(id).setAttribute("aria-invalid", "false"); $(id + "Err").textContent = ""; $("pfError").hidden = true; }));
+  $("pfProperty").addEventListener("change", () => { $("pfProperty").setAttribute("aria-invalid", "false"); $("pfPropertyErr").textContent = ""; });
+
+  $("pfForm").addEventListener("submit", async e => {
+    e.preventDefault();
+    clearErrs();
+    const prop = houses().find(p => p.id === $("pfProperty").value);
+    const name = $("pfName").value.replace(/\s+/g, " ").trim(), phone = $("pfPhone").value.trim(), email = $("pfEmail").value.trim();
+    let first = null;
+    const bad = (id, m) => { setErr(id, m); if (!first) first = id; };
+    if (!prop) bad("pfProperty", "Choose the property.");
+    if (!name) bad("pfName", "Enter the client's name.");
+    if ((phone.match(/\d/g) || []).length < 7) bad("pfPhone", "Enter a phone number.");
+    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) bad("pfEmail", "Enter a valid email or leave it empty.");
+
+    const items = [];
+    let rowBad = false;
+    document.querySelectorAll("#pfRows .pf-row").forEach(r => {
+      const d = r.querySelector(".pf-desc"), dt = r.querySelector(".pf-date"), a = r.querySelector(".pf-amt");
+      const desc = d.value.replace(/\s+/g, " ").trim(), amt = Number(a.value);
+      let ok = true;
+      if (!desc) { d.setAttribute("aria-invalid", "true"); ok = false; }
+      if (!dt.value) { dt.setAttribute("aria-invalid", "true"); ok = false; }
+      if (!(amt > 0)) { a.setAttribute("aria-invalid", "true"); ok = false; }
+      if (!ok) rowBad = true;
+      else items.push({ id: P.newItemId(), description: desc, dueDate: dt.value, amount: Math.round(amt), status: "Pending", method: "", paidDate: "", reference: "" });
+    });
+    if (rowBad) { $("pfError").textContent = "Each payment needs a description, a due date and an amount above zero."; $("pfError").hidden = false; }
+    if (first) { $(first).focus(); return; }
+    if (rowBad) return;
+
+    const plan = {
+      id: P.newId(), propertyId: prop.id,
+      property: { title: prop.title, loc: prop.loc, ref: prop.ref || "" },
+      client: { name: name, phone: phone, email: email },
+      items: items, createdAt: new Date().toISOString()
+    };
+    const sendBtn = $("pfForm").querySelector('button[type="submit"]');
+    if (sendBtn.disabled) return;
+    const sendLabel = sendBtn.textContent;
+    sendBtn.disabled = true; sendBtn.textContent = "Saving\u2026";
+    const saved = await P.add(plan);
+    sendBtn.disabled = false; sendBtn.textContent = sendLabel;
+    if (!saved) { $("pfError").textContent = "Couldn't save the payment plan. Check your internet connection and that you are still logged in, then try again."; $("pfError").hidden = false; return; }
+    filter = "All";
+    $("pmForm").close();
+    openPlan(plan.id);
+  });
+  $("pfCancel").addEventListener("click", () => $("pmForm").close());
+  $("pfClose").addEventListener("click", () => $("pmForm").close());
+  $("pmForm").addEventListener("close", unlockScroll);
+
+  $("pmFilters").addEventListener("click", e => {
+    const b = e.target.closest("[data-filter]"); if (!b) return;
+    filter = b.dataset.filter; render();
+  });
+  $("pmRows").addEventListener("click", e => {
+    const row = e.target.closest("tr[data-id]"); if (row) openPlan(row.dataset.id);
+  });
+  P.onChange(render);
+  render();
+})();
+});
+</script>
+<script src="../Js/Store.js"></script>
+<script src="../Js/DevBadge.js"></script>
+</body>
+</html>
